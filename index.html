@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adrien Poly</title>
+
+    <style>
+      @font-face {
+        font-family: "Geist";
+        src: url("https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/Geist-Variable.woff2")
+          format("woff2");
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      :root {
+        --accent: #b3211c;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: #0b0b0c;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Geist", sans-serif;
+      }
+
+      .v5-root {
+        position: relative;
+        width: 1280px;
+        height: 800px;
+        padding: 64px;
+        background: #0b0b0c;
+        color: #e8e6e0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+
+      .v5-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          900px 500px at 50% 30%,
+          color-mix(in srgb, var(--accent, #b3211c) 8%, transparent),
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+
+      .v5-tag {
+        position: relative;
+        z-index: 1;
+        font-family: "Geist", sans-serif;
+        font-weight: 380;
+        font-size: 34px;
+        line-height: 1.36;
+        letter-spacing: -0.018em;
+        color: #e8e6e0;
+        max-width: 880px;
+        text-align: center;
+        margin: 0;
+        text-wrap: balance;
+      }
+
+      .v5-tag b {
+        font-weight: 560;
+        color: #fafaf7;
+        position: relative;
+      }
+
+      .v5-tag b::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -4px;
+        height: 2px;
+        border-radius: 2px;
+        background: var(--accent, #b3211c);
+      }
+
+      .v5-tag .v5-mute {
+        color: #9a958a;
+        font-style: normal;
+      }
+
+      .v5-tag .v5-mute em {
+        font-style: normal;
+        color: var(--accent, #b3211c);
+      }
+
+      .v5-links {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        gap: 28px;
+        margin-top: 56px;
+        font-size: 14px;
+        letter-spacing: 0.01em;
+      }
+
+      .v5-links a {
+        color: #e8e6e0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        position: relative;
+        padding-bottom: 3px;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      .v5-links a::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--accent, #b3211c);
+        opacity: 0;
+        transition: opacity 0.2s;
+        flex-shrink: 0;
+      }
+
+      .v5-links a::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 13px;
+        right: 0;
+        height: 1px;
+        background: #3a3833;
+        transition: background 0.2s;
+      }
+
+      .v5-links a:hover {
+        color: #fafaf7;
+      }
+
+      .v5-links a:hover::before {
+        opacity: 1;
+      }
+
+      .v5-links a:hover::after {
+        background: var(--accent, #b3211c);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="v5-root">
+      <div class="v5-bg" aria-hidden="true"></div>
+
+      <p class="v5-tag">
+        I'm <b>Adrien Poly</b>, a CTO and product builder based in Bordeaux. I build digital products with a mix of code, product thinking, and design sensitivity,
+        <span class="v5-mute">and contribute to <em>open source</em> projects in the Ruby and Rails community.</span>
+      </p>
+
+      <nav class="v5-links" aria-label="Social links">
+        <a href="https://github.com/adrienpoly" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://x.com/adrienpoly" target="_blank" rel="noopener noreferrer">Twitter</a>
+        <a href="https://linkedin.com/in/adrienpoly" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      </nav>
+    </main>
+  </body>
+</html>
