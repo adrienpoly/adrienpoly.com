@@ -25,22 +25,33 @@
         box-sizing: border-box;
       }
 
+      html {
+        height: 100%;
+        overflow: hidden;
+      }
+
       html,
       body {
         margin: 0;
-        min-height: 100vh;
         background: #0b0b0c;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         font-family: "Geist", sans-serif;
+      }
+
+      body {
+        height: 100%;
+        min-height: 100dvh;
+        overflow: hidden;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
       }
 
       .v5-root {
         position: relative;
-        width: 1280px;
-        height: 800px;
-        padding: 64px;
+        width: 100%;
+        max-width: 1280px;
+        height: 100dvh;
+        padding: clamp(32px, 5vh, 64px) clamp(24px, 4vw, 64px);
         background: #0b0b0c;
         color: #e8e6e0;
         display: flex;
@@ -108,9 +119,10 @@
         z-index: 1;
         display: flex;
         gap: 28px;
-        margin-top: 56px;
+        margin-top: clamp(32px, 4vh, 48px);
         font-size: 14px;
         letter-spacing: 0.01em;
+        flex-shrink: 0;
       }
 
       .v5-links a {
@@ -157,6 +169,96 @@
       .v5-links a:hover::after {
         background: var(--accent, #b3211c);
       }
+
+      .v5-projects {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 960px;
+        margin-top: clamp(36px, 5vh, 56px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        flex-shrink: 0;
+      }
+
+      .v5-projects-heading {
+        margin: 0;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        color: #9a958a;
+      }
+
+      .v5-project-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+      }
+
+      .v5-project-card {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        height: 100%;
+        padding: 20px;
+        border: 1px solid #2a2824;
+        border-radius: 10px;
+        background: color-mix(in srgb, #fafaf7 2.5%, #0b0b0c);
+        text-decoration: none;
+        transition: border-color 0.2s, background 0.2s;
+      }
+
+      .v5-project-card:hover {
+        border-color: color-mix(in srgb, var(--accent, #b3211c) 50%, #2a2824);
+        background: color-mix(in srgb, var(--accent, #b3211c) 5%, #0b0b0c);
+      }
+
+      .v5-project-card h3 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        color: #fafaf7;
+        transition: color 0.2s;
+      }
+
+      .v5-project-card:hover h3 {
+        color: var(--accent, #b3211c);
+      }
+
+      .v5-project-card p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.55;
+        color: #9a958a;
+        letter-spacing: 0.005em;
+      }
+
+      @media (max-width: 760px) {
+        html,
+        body {
+          overflow: auto;
+        }
+
+        .v5-root {
+          height: auto;
+          min-height: 100dvh;
+          overflow: visible;
+          justify-content: flex-start;
+          padding-top: 48px;
+          padding-bottom: 48px;
+        }
+
+        .v5-project-list {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
@@ -173,6 +275,30 @@
         <a href="https://x.com/adrienpoly" target="_blank" rel="noopener noreferrer">Twitter</a>
         <a href="https://linkedin.com/in/adrienpoly" target="_blank" rel="noopener noreferrer">LinkedIn</a>
       </nav>
+
+      <section class="v5-projects" aria-labelledby="projects-heading">
+        <h2 class="v5-projects-heading" id="projects-heading">Currently working on</h2>
+        <ul class="v5-project-list">
+          <li>
+            <a class="v5-project-card" href="https://plume-app.co" target="_blank" rel="noopener noreferrer">
+              <h3>Plume</h3>
+              <p>Helping students become better writers through creative and structured writing experiences.</p>
+            </a>
+          </li>
+          <li>
+            <a class="v5-project-card" href="https://rubyevents.org" target="_blank" rel="noopener noreferrer">
+              <h3>RubyEvents.org</h3>
+              <p>Making Ruby talks, conferences, and community events easier to discover, watch, and revisit.</p>
+            </a>
+          </li>
+          <li>
+            <a class="v5-project-card" href="https://listdeco.com" target="_blank" rel="noopener noreferrer">
+              <h3>ListDeco.com</h3>
+              <p>A simple way for interior decorators to build, organize, and share curated shopping lists with their clients.</p>
+            </a>
+          </li>
+        </ul>
+      </section>
     </main>
   </body>
 </html>
