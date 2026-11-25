@@ -227,6 +227,13 @@
   background: var(--ink);
 }
 
+.editor-note {
+  margin: 10px 32px 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
 .editor-delete {
   display: block;
   margin: 18px auto 0;

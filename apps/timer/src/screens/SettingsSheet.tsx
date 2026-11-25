@@ -8,13 +8,21 @@ interface Props {
   isOpen: boolean;
   language: LanguageSetting;
   onChange: (language: LanguageSetting) => void;
+  onSounds: () => void;
   /** Set while the app is not installed: adds the entry that leads to the install steps. */
   onInstall?: () => void;
   onClose: () => void;
 }
 
-/** The app's settings: the language of the texts and of the voice, and the way to install the app. */
-export function SettingsSheet({ isOpen, language, onChange, onInstall, onClose }: Props) {
+/** The app's settings: the language of the texts and of the voice, the sounds, and the way to install the app. */
+export function SettingsSheet({
+  isOpen,
+  language,
+  onChange,
+  onSounds,
+  onInstall,
+  onClose,
+}: Props) {
   const t = useMessages();
 
   const choices: Array<{ value: LanguageSetting; label: string; hint?: string }> = [
@@ -59,8 +67,15 @@ export function SettingsSheet({ isOpen, language, onChange, onInstall, onClose }
           ))}
         </div>
 
-        {onInstall && (
-          <div className="settings-choices">
+        <div className="settings-choices">
+          <button onClick={onSounds}>
+            <span className="settings-choice-text">
+              <span>{t.sounds.title}</span>
+              <span>{t.sounds.hint}</span>
+            </span>
+            <ChevronIcon />
+          </button>
+          {onInstall && (
             <button onClick={onInstall}>
               <span className="settings-choice-text">
                 <span>{t.install.title}</span>
@@ -68,8 +83,8 @@ export function SettingsSheet({ isOpen, language, onChange, onInstall, onClose }
               </span>
               <ChevronIcon />
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </IonModal>
   );

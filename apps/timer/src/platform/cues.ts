@@ -1,4 +1,5 @@
 import { Haptics } from "@capacitor/haptics";
+import type { Tone } from "./sounds";
 
 // Sound, voice and vibration cues of a session.
 
@@ -6,11 +7,19 @@ let audio: AudioContext | null = null;
 
 /**
  * Browsers only allow sound that starts from a tap. Call this in the tap that
- * starts a session; the cues that follow are then allowed to play.
+ * plays a sound, or that starts something which will.
  */
-export function unlockCues() {
+export function unlockAudio() {
   audio ??= new AudioContext();
   if (audio.state === "suspended") void audio.resume();
+}
+
+/**
+ * Call this in the tap that starts a session; the cues that follow are then
+ * allowed to play.
+ */
+export function unlockCues() {
+  unlockAudio();
 
   // Same rule for speech on iOS: the first utterance must come from a tap.
   if ("speechSynthesis" in window) {
@@ -18,41 +27,47 @@ export function unlockCues() {
   }
 }
 
-function beep(frequency: number, durationMs: number, delayMs = 0) {
-  if (!audio) return;
+/** Loudness of each wave shape, set so that the variants sound about as loud as each other. */
+const LEVELS: Record<OscillatorType, number> = {
+  square: 0.25,
+  sawtooth: 0.25,
+  sine: 0.5,
+  triangle: 0.5,
+  custom: 0.25,
+};
 
-  const start = audio.currentTime + delayMs / 1000;
-  const end = start + durationMs / 1000;
-  const oscillator = audio.createOscillator();
-  const gain = audio.createGain();
+/** Schedules the tones on the given context. Exported so that a sound can be rendered and checked. */
+export function scheduleTones(context: BaseAudioContext, tones: readonly Tone[]) {
+  for (const tone of tones) {
+    const start = context.currentTime + (tone.delayMs ?? 0) / 1000;
+    const end = start + tone.durationMs / 1000;
+    const level = LEVELS[tone.wave];
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
 
-  oscillator.type = "square";
-  oscillator.frequency.value = frequency;
-  // A short fade in and out avoids clicks.
-  gain.gain.setValueAtTime(0, start);
-  gain.gain.linearRampToValueAtTime(0.25, start + 0.01);
-  gain.gain.setValueAtTime(0.25, end - 0.03);
-  gain.gain.linearRampToValueAtTime(0, end);
+    oscillator.type = tone.wave;
+    oscillator.frequency.setValueAtTime(tone.frequency, start);
+    if (tone.glideTo) oscillator.frequency.exponentialRampToValueAtTime(tone.glideTo, end);
 
-  oscillator.connect(gain).connect(audio.destination);
-  oscillator.start(start);
-  oscillator.stop(end);
+    // A short fade in and out avoids clicks.
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(level, start + 0.01);
+    if (tone.rings) {
+      gain.gain.exponentialRampToValueAtTime(0.001, end);
+    } else {
+      gain.gain.setValueAtTime(level, end - 0.03);
+      gain.gain.linearRampToValueAtTime(0, end);
+    }
+
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(end);
+  }
 }
 
-/** One of the 3-2-1 beeps at the end of a phase. */
-export function beepCountdown() {
-  beep(880, 110);
-}
-
-/** The longer, higher beep that starts a phase. */
-export function beepPhaseStart() {
-  beep(1320, 420);
-}
-
-export function beepFinish() {
-  beep(1320, 160);
-  beep(1320, 160, 240);
-  beep(1760, 520, 480);
+/** Plays a sound from the catalogue (`SOUNDS[event][variant]`). Silent until `unlockAudio` has run. */
+export function playSound(tones: readonly Tone[]) {
+  if (audio) scheduleTones(audio, tones);
 }
 
 /** Speaks the text with a voice of the given language ("en-US", "fr-FR"). */

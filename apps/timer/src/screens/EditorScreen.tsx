@@ -14,6 +14,7 @@ import {
   type Timer,
   type TimerOptions,
 } from "../model/timer";
+import { isIos } from "../platform/ios";
 import { DurationSheet, type SheetField } from "./DurationSheet";
 import "./EditorScreen.css";
 
@@ -253,6 +254,7 @@ function Editor({ initial, onCancel, onSave, onSaveAndStart, onDelete }: EditorP
               </label>
             ))}
           </div>
+          {isIos(navigator) && <p className="editor-note">{t.sounds.silentModeNote}</p>}
 
           {onDelete && (
             <button className="text-button editor-delete" onClick={confirmDelete}>

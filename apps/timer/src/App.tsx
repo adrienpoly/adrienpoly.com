@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { IonApp } from "@ionic/react";
+import { IonApp, IonToast } from "@ionic/react";
 import { MESSAGES, resolveLanguage } from "./i18n/language";
 import { MessagesContext } from "./i18n/useMessages";
 import type { Timer } from "./model/timer";
 import { unlockCues } from "./platform/cues";
+import { useSilentModeHint } from "./platform/useSilentModeHint";
 import { InstallCard } from "./pwa/InstallCard";
 import { InstallSheet } from "./pwa/InstallSheet";
 import { UpdatePrompt } from "./pwa/UpdatePrompt";
@@ -12,9 +13,11 @@ import { DoneScreen } from "./screens/DoneScreen";
 import { EditorScreen } from "./screens/EditorScreen";
 import { SessionScreen, type SessionResult } from "./screens/SessionScreen";
 import { SettingsSheet } from "./screens/SettingsSheet";
+import { SoundsSheet } from "./screens/SoundsSheet";
 import { TemplatesSheet } from "./screens/TemplatesSheet";
 import { TimersScreen } from "./screens/TimersScreen";
 import { useLanguageSetting } from "./storage/useLanguageSetting";
+import { useSoundChoice } from "./storage/useSoundChoice";
 import { useTimers } from "./storage/useTimers";
 
 /** What fills the screen. The template sheet and the editor open on top of the list. */
@@ -35,6 +38,9 @@ export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const install = useInstall();
   const [installOpen, setInstallOpen] = useState(false);
+  const silentModeHint = useSilentModeHint();
+  const { sounds, choose: chooseSound } = useSoundChoice();
+  const [soundsOpen, setSoundsOpen] = useState(false);
   // The draft stays set while the editor animates out, so its content stays visible.
   const [draft, setDraft] = useState<Timer | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -55,6 +61,7 @@ export function App() {
   function start(timer: Timer) {
     unlockCues();
     setScreen({ name: "session", timer, run: Date.now() });
+    silentModeHint.showOnce();
   }
 
   const showResult = useCallback((result: SessionResult) => setScreen({ name: "done", result }), []);
@@ -96,6 +103,10 @@ export function App() {
           isOpen={settingsOpen}
           language={setting}
           onChange={choose}
+          onSounds={() => {
+            setSettingsOpen(false);
+            setSoundsOpen(true);
+          }}
           onInstall={
             install.available
               ? () => {
@@ -105,6 +116,13 @@ export function App() {
               : undefined
           }
           onClose={() => setSettingsOpen(false)}
+        />
+
+        <SoundsSheet
+          isOpen={soundsOpen}
+          sounds={sounds}
+          onChange={chooseSound}
+          onClose={() => setSoundsOpen(false)}
         />
 
         <InstallSheet
@@ -153,6 +171,7 @@ export function App() {
           <SessionScreen
             key={screen.run}
             timer={screen.timer}
+            sounds={sounds}
             onStop={() => setScreen({ name: "timers" })}
             onFinish={showResult}
           />
@@ -165,6 +184,15 @@ export function App() {
             onBack={() => setScreen({ name: "timers" })}
           />
         )}
+
+        <IonToast
+          isOpen={silentModeHint.isOpen}
+          position="top"
+          message={messages.sounds.silentModeHint}
+          duration={8000}
+          buttons={[{ text: messages.common.done, role: "cancel" }]}
+          onDidDismiss={silentModeHint.close}
+        />
 
         <UpdatePrompt />
       </MessagesContext.Provider>

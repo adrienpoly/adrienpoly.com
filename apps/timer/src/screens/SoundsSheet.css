@@ -1,0 +1,53 @@
+.sounds {
+  gap: 18px;
+}
+
+.sounds-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sounds-top h2 {
+  margin: 0;
+  font-size: 44px;
+  line-height: 0.9;
+}
+
+.sounds-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.sounds-variants {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.sounds-variants button {
+  min-height: 46px;
+  padding: 0 4px;
+  border: none;
+  border-radius: 14px;
+  background: var(--panel-raised);
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.sounds-variants button[aria-checked="true"] {
+  background: var(--lime);
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.sounds-note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}

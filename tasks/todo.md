@@ -211,3 +211,56 @@ Not verified:
 
 - The wording against a real iPhone (where Safari puts Share, the exact label of "Add to Home Screen"), a real Android phone and Safari on a Mac.
 - `launch_handler`: only its presence in the manifest. Its effect needs an installed app in Chrome or Edge.
+
+## Timer: no sound on the iPhone — 2026-11-25
+
+Branch `feat/timer-install-prompt`, not committed.
+
+- Report: no sound on the user's iPhone, in Safari.
+- Expected vs actual: beeps and voice during a session; nothing was heard.
+- Root cause: the iPhone was in Silent Mode (Action button). Silent Mode mutes Web Audio and speech synthesis in Safari, and the page cannot know it. Not a defect in the session code: on the device, a single phrase spoken from a tap was silent too, and beeps only came through an audio file or the "playback" audio session.
+- How it was found: a standalone test page served on the local network, with seven isolated variants (the app's sequence, voice alone, Web Audio alone, audio files, "playback" session), run by the user on the phone.
+- Fix: nothing changes in how sound is played. On iOS only, the first session shows a reminder once ("No sound? Turn off Silent Mode on your iPhone."), and the editor's options carry a permanent note. iPhone detection moved to `src/platform/ios.ts` (shared with the install steps).
+- Regression coverage: unit tests for `isIos`.
+- Verification: `pnpm check`, `pnpm test` (35 passed), `pnpm build`; headless Chrome with an iPhone user agent: reminder on the first session in French and English, not on the second nor after a reload, never on Android; note in the editor on iOS only; no console errors.
+- Not verified: the reminder and the note on the real iPhone.
+- Open decision: make the beeps play in Silent Mode with `navigator.audioSession.type = "playback"`. Not done: the voice would stay muted anyway, and it may stop music playing in another app (not tested). To settle it: play music on the iPhone and run the "playback" variant.
+- Follow-up, not done: resume the audio context when its state is "interrupted" (after Safari was in the background), a known iOS behavior that was not reported here.
+
+## Timer: choice of sounds in the settings — 2026-11-25
+
+Branch `feat/timer-install-prompt`. Asked by the user: offer several variants for each sound, in the settings.
+
+Acceptance criteria:
+
+- The settings sheet has a "Sounds" entry that opens a sheet with the three sounds of a session (3-2-1 countdown, start of a phase, end of the session). Each has four variants: Classic (today's sound, the default), Soft, Bell, Arcade.
+- Tapping a variant selects it and plays it. The choice is kept on the device and used by every session.
+- English and French. No audio files, no new dependency: the variants are synthesized like today's beeps.
+
+Checklist:
+
+- [x] Failing tests: the catalogue of sounds is complete and playable; a stored choice with unknown values falls back to the defaults
+- [x] `src/platform/sounds.ts` (catalogue, choice), `cues.ts` plays a list of tones
+- [x] `src/storage/useSoundChoice.ts`, `src/screens/SoundsSheet.tsx`, settings entry, session uses the choice
+- [x] Verify: check, tests, build; in a browser: every variant renders audible, non-clipping audio; selecting plays and persists; a session plays the chosen variants
+- [x] Results
+
+Working notes:
+
+- The sounds get their own sheet: added to the settings sheet, they would not fit the height of Safari on an iPhone.
+- I cannot hear the result. The check is on the rendered signal (duration, peak level); how the variants sound is for the user to judge.
+
+Results:
+
+- `src/platform/sounds.ts`: the catalogue (3 sounds × 4 variants, as lists of tones), the choice and `parseSoundChoice`. `cues.ts` now plays a list of tones (`playSound`, `scheduleTones`) and `unlockAudio` is split from `unlockCues` so that a tap in the settings can play a preview.
+- `src/storage/useSoundChoice.ts` (Preferences key `sounds`), `src/screens/SoundsSheet.tsx` (+ CSS), a "Sounds" entry in the settings sheet, `SessionScreen` takes the choice as a prop.
+- The messages of the Silent Mode reminder moved into the `sounds` section.
+
+How it was verified:
+
+- `pnpm check`, `pnpm test` (41 passed, 6 new), `pnpm build`.
+- Headless Chrome, dev server: each of the 12 variants rendered with the app's own code through an `OfflineAudioContext`: audible, peak between 0.24 and 0.50 (no clipping), expected length. The sheet fits at 390×844 and 320×568 in both languages, no label cut. Tapping a variant plays it and selects it; the choice is stored and still there after a reload. A session played the chosen variants at the start of a phase, on the 3-2-1 countdown and at the end. No console errors.
+
+Not verified:
+
+- How the variants sound, and their relative loudness: nobody has listened to them yet.

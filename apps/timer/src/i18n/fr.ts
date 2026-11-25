@@ -147,6 +147,19 @@ export const fr: Messages = {
     automaticHint: "La langue de cet appareil",
   },
 
+  sounds: {
+    title: "Sons",
+    hint: "Décompte, début de phase, fin de séance",
+    events: {
+      countdown: "Décompte 3-2-1",
+      phaseStart: "Début de phase",
+      finish: "Fin de séance",
+    },
+    variants: { classic: "Classique", soft: "Doux", bell: "Cloche", arcade: "Arcade" },
+    silentModeHint: "Pas de son ? Désactive le mode silencieux de l’iPhone.",
+    silentModeNote: "Sur iPhone et iPad, le mode silencieux coupe les bips et la voix.",
+  },
+
   install: {
     title: "Installer l’app",
     pitch: "Plein écran, utilisable hors ligne, sur ton écran d’accueil.",

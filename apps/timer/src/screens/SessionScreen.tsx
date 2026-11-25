@@ -27,7 +27,8 @@ import {
   type PhaseKind,
   type Timer,
 } from "../model/timer";
-import { beepCountdown, beepFinish, beepPhaseStart, say, vibrate } from "../platform/cues";
+import { playSound, say, vibrate } from "../platform/cues";
+import { SOUNDS, type SoundChoice } from "../platform/sounds";
 import { useMessages } from "../i18n/useMessages";
 import { useWakeLock } from "../platform/useWakeLock";
 import "./SessionScreen.css";
@@ -41,6 +42,8 @@ export interface SessionResult {
 
 interface Props {
   timer: Timer;
+  /** The variant to play for each sound. */
+  sounds: SoundChoice;
   onStop: () => void;
   onFinish: (result: SessionResult) => void;
 }
@@ -48,7 +51,7 @@ interface Props {
 const TICK_MS = 100;
 
 /** Screens 5 and 5b: the running session, full screen in the color of the phase. */
-export function SessionScreen({ timer, onStop, onFinish }: Props) {
+export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
   const t = useMessages();
   const phases = useMemo(() => buildPhases(timer, t.phases), [timer, t]);
   const [session, setSession] = useState(() => createSession(phases, Date.now()));
@@ -80,7 +83,7 @@ export function SessionScreen({ timer, onStop, onFinish }: Props) {
     announcedIndex.current = session.index;
 
     if (isFinished(session)) {
-      beepFinish();
+      playSound(SOUNDS.finish[sounds.finish]);
       if (options.voice) say(t.session.sayFinished, t.speechLang);
       if (options.vibration) vibrate();
       onFinish({ timer, finishedAt: Date.now(), spentMs: session.spentMs });
@@ -88,12 +91,12 @@ export function SessionScreen({ timer, onStop, onFinish }: Props) {
     }
 
     const current = session.phases[session.index];
-    beepPhaseStart();
+    playSound(SOUNDS.phaseStart[sounds.phaseStart]);
     if (options.voice) {
       say(isLastRound(current, timer) ? t.session.sayLastRound(current.name) : current.name, t.speechLang);
     }
     if (options.vibration) vibrate();
-  }, [session, timer, options, onFinish, t]);
+  }, [session, timer, options, sounds, onFinish, t]);
 
   const beepedSecond = useRef("");
   useEffect(() => {
@@ -101,8 +104,8 @@ export function SessionScreen({ timer, onStop, onFinish }: Props) {
     const second = `${session.index}:${phaseRemainingSeconds}`;
     if (beepedSecond.current === second) return;
     beepedSecond.current = second;
-    beepCountdown();
-  }, [options.countdown, paused, session.index, phaseRemainingSeconds]);
+    playSound(SOUNDS.countdown[sounds.countdown]);
+  }, [options.countdown, sounds, paused, session.index, phaseRemainingSeconds]);
 
   function confirmStop() {
     void presentAlert({

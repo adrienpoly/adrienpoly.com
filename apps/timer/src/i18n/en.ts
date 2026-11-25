@@ -163,6 +163,19 @@ export const en = {
     automaticHint: "The language of this device",
   },
 
+  sounds: {
+    title: "Sounds",
+    hint: "Countdown, start of a phase, end of the session",
+    events: {
+      countdown: "3-2-1 countdown",
+      phaseStart: "Start of a phase",
+      finish: "End of the session",
+    },
+    variants: { classic: "Classic", soft: "Soft", bell: "Bell", arcade: "Arcade" },
+    silentModeHint: "No sound? Turn off Silent Mode on your iPhone.",
+    silentModeNote: "On iPhone and iPad, Silent Mode mutes the beeps and the voice.",
+  },
+
   install: {
     title: "Install the app",
     pitch: "Full screen, works offline, on your Home Screen.",
