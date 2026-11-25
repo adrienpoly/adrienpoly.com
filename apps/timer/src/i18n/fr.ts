@@ -147,8 +147,45 @@ export const fr: Messages = {
     automaticHint: "La langue de cet appareil",
   },
 
+  install: {
+    title: "Installer l’app",
+    pitch: "Plein écran, utilisable hors ligne, sur ton écran d’accueil.",
+    install: "Installer",
+    showSteps: "Voir comment faire",
+    hide: "Masquer l’invitation à installer",
+    steps: {
+      ios: [
+        "Touche le bouton Partager du navigateur. Dans Safari sur un iPhone récent, il est dans le menu •••.",
+        "Fais défiler et touche « Sur l’écran d’accueil ».",
+        "Touche « Ajouter ».",
+      ],
+      macSafari: [
+        "Dans la barre des menus, ouvre « Fichier ».",
+        "Choisis « Ajouter au Dock ».",
+        "Clique sur « Ajouter ».",
+      ],
+      android: [
+        "Ouvre le menu du navigateur (⋮).",
+        "Touche « Installer l’application » ou « Ajouter à l’écran d’accueil ».",
+        "Confirme avec « Installer ».",
+      ],
+      desktop: [
+        "Clique sur l’icône d’installation à droite de la barre d’adresse, ou ouvre le menu du navigateur.",
+        "Choisis « Installer Sport Timer ».",
+        "Confirme avec « Installer ».",
+      ],
+    },
+    notes: {
+      ios: "Pas de bouton Partager ? Ouvre cette page dans Safari.",
+      macSafari: "Demande macOS Sonoma ou plus récent.",
+      android: "Rien de tel dans le menu ? Ouvre cette page dans Chrome.",
+      desktop: "Chrome et Edge peuvent installer des apps. Firefox ne le peut pas.",
+    },
+    alreadyInstalled:
+      "Déjà installée ? Ouvre-la depuis son icône : un onglet du navigateur ne peut pas basculer tout seul vers l’app.",
+  },
+
   pwa: {
-    installHint: "Pour installer l’app : touche Partager, puis « Sur l’écran d’accueil ».",
     offlineReady: "Prêt à fonctionner hors ligne.",
     updateAvailable: "Une nouvelle version est disponible.",
     later: "Plus tard",

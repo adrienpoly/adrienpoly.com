@@ -1,0 +1,151 @@
+/* The invitation card on the home screen. */
+.install-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0 16px 14px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--lime) 40%, transparent);
+  border-radius: 22px;
+  background: var(--panel);
+}
+
+.install-card-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.install-card-icon {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.install-card-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.install-card-text h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.install-card-text p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.install-card-hide {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  width: 44px;
+  height: 44px;
+  /* The hit area is 44px; the margins pull the cross into the corner of the card. */
+  margin: -8px -8px 0 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+}
+
+.install-card-action {
+  min-height: 48px;
+  border: none;
+  border-radius: 24px;
+  background: var(--lime);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+/* The sheet with the steps. */
+.install-sheet {
+  gap: 16px;
+}
+
+.install-sheet-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.install-sheet-top h2 {
+  margin: 0;
+  font-size: 44px;
+  line-height: 0.9;
+}
+
+.install-steps {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border-radius: 20px;
+  background: var(--panel-raised);
+  list-style: none;
+}
+
+.install-steps li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.install-steps li:last-child {
+  border-bottom: none;
+}
+
+.install-step-number {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background: var(--lime);
+  font-size: 22px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.install-step-text {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.install-step-icon {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--lime);
+}
+
+.install-note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
