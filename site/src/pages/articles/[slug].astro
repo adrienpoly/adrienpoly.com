@@ -1,0 +1,123 @@
+---
+import { render } from "astro:content";
+import Page from "../../layouts/Page.astro";
+import { formatDate, getArticles, readingMinutes, type Article } from "../../lib/articles";
+import "../../styles/prose.css";
+
+export async function getStaticPaths() {
+  const articles = await getArticles();
+  return articles.map((article) => ({ params: { slug: article.id }, props: { article } }));
+}
+
+interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+const { title, description, pubDate, updatedDate, draft } = article.data;
+const { Content } = await render(article);
+---
+
+<Page title={title} description={description}>
+  <article>
+    <header class="article-header">
+      <p class="article-meta">
+        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+        <span aria-hidden="true">·</span>
+        {readingMinutes(article.body)} min read
+        {
+          updatedDate && (
+            <>
+              <span aria-hidden="true">·</span>
+              Updated <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time>
+            </>
+          )
+        }
+        {draft && <span class="draft">Draft</span>}
+      </p>
+      <h1>{title}</h1>
+      <p class="article-lede">{description}</p>
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+
+  <p class="article-back"><a href="/articles/">← All articles</a></p>
+</Page>
+
+<style>
+  .article-header {
+    margin-bottom: 48px;
+  }
+
+  .article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin: 0 0 18px;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+  }
+
+  .draft {
+    margin-left: 4px;
+    padding: 2px 7px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(32px, 5.2vw, 44px);
+    font-weight: 560;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    color: var(--text-strong);
+    text-wrap: balance;
+  }
+
+  .article-lede {
+    margin: 18px 0 0;
+    font-size: 20px;
+    font-weight: 380;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+    color: var(--text-muted);
+    text-wrap: pretty;
+  }
+
+  .article-back {
+    margin: 64px 0 0;
+    font-size: 14px;
+  }
+
+  .article-back a {
+    padding-bottom: 3px;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--rule);
+    transition: border-color 0.2s;
+  }
+
+  .article-back a:hover {
+    border-color: var(--accent);
+  }
+
+  @media (max-width: 760px) {
+    .article-header {
+      margin-bottom: 36px;
+    }
+
+    .article-lede {
+      font-size: 18px;
+    }
+  }
+</style>

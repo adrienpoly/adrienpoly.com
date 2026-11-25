@@ -1,0 +1,13 @@
+// Cloudflare Workers config: serves the built app (dist/) as static files on its own subdomain.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "timer-adrienpoly",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./dist",
+    // Unknown paths get index.html, so the app also opens from a deep link.
+    "not_found_handling": "single-page-application"
+  },
+  // The zone is on Cloudflare: this creates the DNS record and the certificate.
+  "routes": [{ "pattern": "timer.adrienpoly.com", "custom_domain": true }]
+}

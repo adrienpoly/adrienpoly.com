@@ -1,0 +1,184 @@
+/* Design tokens and shared building blocks ("Néon nuit"). Screen styles live next to each screen. */
+
+:root {
+  --ink: #0f0f14;
+  --panel: #1b1b23;
+  --panel-raised: #22222c;
+  --sheet: #17171e;
+  --line: #2a2a35;
+  --line-strong: #3a3a46;
+  --muted: #a0a0ab;
+  --dim: #5c5c6a;
+  --soft: #e4e4ea;
+  --lime: #c6ff00;
+
+  --font-text: "Manrope Variable", system-ui, sans-serif;
+  --font-display: "Big Shoulders Display Variable", "Arial Narrow", sans-serif;
+
+  /* Ionic reads these for its own components (alerts, toasts, modals). */
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+  --ion-font-family: var(--font-text);
+  --ion-color-primary: #c6ff00;
+  --ion-color-primary-rgb: 198, 255, 0;
+  --ion-color-primary-contrast: #0f0f14;
+  --ion-color-primary-contrast-rgb: 15, 15, 20;
+  --ion-color-primary-shade: #aee000;
+  --ion-color-primary-tint: #ccff1a;
+}
+
+/* Ionic's dark palette sets its background on these selectors, so the override must match them. */
+:root.ios,
+:root.md,
+:root.ios ion-modal,
+:root.md ion-modal {
+  --ion-background-color: #0f0f14;
+  --ion-background-color-rgb: 15, 15, 20;
+}
+
+html {
+  background: var(--ink);
+}
+
+body {
+  font-family: var(--font-text);
+  color: #ffffff;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+button {
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+button:active:not(:disabled) {
+  opacity: 0.72;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+input {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Condensed uppercase display type, used for titles and every big number. */
+.display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-button {
+  min-height: 44px;
+  padding: 10px 0;
+  border: none;
+  background: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lime);
+}
+
+.text-button.is-muted {
+  color: var(--muted);
+}
+
+.text-button.is-strong {
+  font-weight: 800;
+}
+
+/* The main action of a screen: a full-width lime pill. */
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  border: none;
+  border-radius: 28px;
+  background: var(--lime);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.cta.has-glow {
+  box-shadow: 0 0 26px rgba(198, 255, 0, 0.3);
+}
+
+.cta:disabled {
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+.cta.is-secondary {
+  background: var(--panel);
+  font-family: var(--font-text);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #ffffff;
+}
+
+/* Bottom sheets (ion-modal with breakpoints): as tall as their content. */
+ion-modal.sheet {
+  --height: auto;
+  --background: var(--sheet);
+  --border-radius: 28px;
+  --backdrop-opacity: 0.6;
+}
+
+ion-modal.sheet::part(content) {
+  border-top: 1px solid var(--line);
+}
+
+/* A sheet without the drag gesture, for content that scrolls itself (the wheels). */
+ion-modal.sheet.is-anchored {
+  --width: 100%;
+  --border-radius: 28px 28px 0 0;
+  align-items: flex-end;
+}
+
+ion-modal.sheet::part(handle) {
+  top: 10px;
+  width: 40px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--line-strong);
+}
+
+.sheet-body {
+  display: flex;
+  flex-direction: column;
+  padding: 26px 20px calc(34px + env(safe-area-inset-bottom));
+}
+
+ion-modal.editor-modal {
+  --background: var(--ink);
+}
+
+/* Ionic alerts and toasts, tinted to match. */
+ion-alert {
+  --background: var(--panel-raised);
+}
+
+ion-toast {
+  --background: var(--panel-raised);
+  --color: #ffffff;
+  --button-color: var(--lime);
+}

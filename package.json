@@ -1,0 +1,15 @@
+{
+  "name": "adrienpoly.com",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "scripts": {
+    "dev": "pnpm --filter site dev",
+    "dev:timer": "pnpm --filter timer dev",
+    "check": "pnpm -r check",
+    "test": "pnpm -r --if-present test",
+    "build": "pnpm -r build"
+  }
+}

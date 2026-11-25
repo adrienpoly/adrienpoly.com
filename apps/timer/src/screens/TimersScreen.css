@@ -1,0 +1,180 @@
+.timers {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  /* Room at the bottom so that the last card can scroll clear of the add button. */
+  padding: env(safe-area-inset-top) 0 calc(112px + env(safe-area-inset-bottom));
+}
+
+.timers-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 20px 20px 4px;
+}
+
+.timers-settings {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  border-radius: 24px;
+  background: var(--panel);
+  color: var(--soft);
+}
+
+.timers-add {
+  position: absolute;
+  right: calc(20px + env(safe-area-inset-right));
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: none;
+  border-radius: 32px;
+  background: var(--lime);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.5),
+    0 0 26px rgba(198, 255, 0, 0.35);
+  color: var(--ink);
+}
+
+.timers-heading {
+  padding: 0 20px 18px;
+}
+
+.timers-heading h1 {
+  margin: 0;
+  /* One line: 60px where there is room, smaller on a narrow phone. */
+  font-size: min(60px, 14vw);
+  line-height: 0.88;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.timers-heading h1 span {
+  color: var(--lime);
+}
+
+.timers-heading p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.timers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0 16px;
+  list-style: none;
+}
+
+/* The card is the clipping frame; its content slides left over the delete button. */
+.timer-card {
+  border-radius: 22px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+/*
+ * ion-item is only there because ion-item-sliding moves it: strip its own look.
+ * The padding is on the body, not on the item, because the item's inner box
+ * would cut off the glow of the start button.
+ */
+.timer-card ion-item {
+  --background: var(--panel);
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 0;
+}
+
+.timer-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+  padding: 14px 14px 14px 18px;
+}
+
+.timer-card-slide-delete {
+  --background: #ff3b4e;
+  --color: #ffffff;
+  width: 92px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.timer-card-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.timer-card-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+}
+
+.timer-card-name {
+  font-size: 17px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timer-card-summary {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.timer-card-total {
+  font-size: 40px;
+  line-height: 1;
+  color: var(--timer-color);
+}
+
+.timer-card-action {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  padding: 0;
+  border: none;
+  border-radius: 26px;
+  background: var(--timer-color);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--timer-color) 35%, transparent);
+  color: var(--ink);
+}
+
+.timer-card-action:disabled {
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+.install-hint {
+  margin: 20px 32px 0;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--muted);
+}

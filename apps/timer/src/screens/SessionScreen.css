@@ -1,0 +1,365 @@
+/* The whole screen takes the color of the phase. Everything on it is ink on that color. */
+.session-viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  background: var(--phase);
+  color: var(--ink);
+  transition: background 0.25s;
+  overflow: hidden;
+}
+
+/*
+ * .session is a size container: every dimension inside is in container units
+ * (cqw / cqh), and the layout switches on the container's orientation. That
+ * way the same rules serve a rotated phone and the "rotated by hand" mode.
+ */
+.session {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  container: session / size;
+}
+
+/* Landscape on a phone held upright (rotation lock on): the screen is turned by 90°. */
+.session.is-rotated {
+  inset: auto;
+  top: 0;
+  left: 0;
+  width: 100dvh;
+  height: 100dvw;
+  transform-origin: top left;
+  transform: rotate(90deg) translateY(-100%);
+}
+
+.session-progress {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+  height: 6px;
+}
+
+.session-progress span {
+  flex-basis: 0;
+  background: var(--ink);
+  opacity: 0.18;
+}
+
+.session-progress span.is-reached {
+  opacity: 0.9;
+}
+
+/* Portrait: one column. The two groups dissolve so their children line up in it. */
+.session-layout {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0 0 calc(30px + env(safe-area-inset-bottom));
+}
+
+.session-primary,
+.session-secondary {
+  display: contents;
+}
+
+.session-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: calc(10px + env(safe-area-inset-top)) 12px 0;
+}
+
+.session-round-button,
+.session-skip {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: rgba(15, 15, 20, 0.12);
+  color: var(--ink);
+}
+
+.session-round-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+}
+
+.session-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-title span {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The clock and the counters sit together in the middle of the free space. */
+.session-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: auto;
+  padding: 0 8px;
+}
+
+.session-phase {
+  /* 64px on a 390px screen, smaller when the name would not fit on the line. */
+  font-size: min(16.4cqw, calc(170cqw / var(--characters)));
+  line-height: 0.9;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.session-time {
+  /* 230px on a 390 × 844 screen. */
+  font-size: min(59cqw, 30cqh);
+  line-height: 0.92;
+  letter-spacing: -2px;
+}
+
+/* From 10:00 up there is one more digit to fit. */
+.session-time.is-long {
+  font-size: min(47cqw, 30cqh);
+}
+
+.session-counters {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 16px 0 auto;
+}
+
+.session-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 92px;
+  padding: 10px 20px;
+  border-radius: 18px;
+  background: var(--ink);
+  color: var(--phase);
+  transition: color 0.25s;
+}
+
+.session-counter-value {
+  font-size: 52px;
+  line-height: 1;
+}
+
+.session-counter-value span {
+  font-size: 28px;
+  color: #ffffff;
+  opacity: 0.6;
+}
+
+.session-counter-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.session-next {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 54px;
+  margin: 16px 12px 0;
+  padding: 12px 16px;
+  border-radius: 18px;
+  background: rgba(15, 15, 20, 0.12);
+}
+
+.session-next-dot {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink);
+  border-radius: 7px;
+}
+
+.session-next-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.session-next-label strong {
+  font-weight: 800;
+}
+
+.session-next-time {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.session-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 36px 0;
+}
+
+.session-skip {
+  width: 58px;
+  height: 58px;
+  border-radius: 29px;
+}
+
+.session-pause {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  padding: 0;
+  border: none;
+  border-radius: 44px;
+  background: var(--ink);
+  color: var(--phase);
+  transition: color 0.25s;
+}
+
+/* Turning the phone already gives landscape; the button is for upright phones only. */
+@media (orientation: landscape) {
+  .session-rotate {
+    display: none;
+  }
+}
+
+/* Landscape: the clock on the left, as large as possible; the rest in a column on the right. */
+@container session (orientation: landscape) {
+  .session-layout {
+    flex-direction: row;
+    gap: 20px;
+    padding: 8px max(20px, env(safe-area-inset-right)) 16px max(52px, env(safe-area-inset-left));
+  }
+
+  .session-primary,
+  .session-secondary {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .session-primary {
+    flex: 1;
+  }
+
+  .session-secondary {
+    flex-shrink: 0;
+    gap: 12px;
+    width: 236px;
+    padding-top: 6px;
+  }
+
+  .session-top {
+    gap: 10px;
+    margin-left: -8px;
+    padding: 0;
+  }
+
+  .session-title {
+    text-align: left;
+  }
+
+  .session-clock {
+    flex: 1;
+    align-items: flex-start;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+  }
+
+  .session-phase {
+    /* 52px on an 844 × 390 screen. */
+    font-size: min(13.3cqh, calc(105cqw / var(--characters)));
+    text-align: left;
+  }
+
+  .session-time {
+    /* 262px on an 844 × 390 screen. */
+    font-size: min(67cqh, 31cqw);
+    line-height: 0.88;
+    margin-left: -6px;
+  }
+
+  .session-time.is-long {
+    font-size: min(60cqh, 25cqw);
+  }
+
+  .session-counters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+  }
+
+  .session-counter {
+    min-width: 0;
+    padding: 10px 8px;
+  }
+
+  .session-counter-value {
+    font-size: 48px;
+  }
+
+  .session-counter-value span {
+    font-size: 26px;
+  }
+
+  .session-counter-label {
+    font-size: 11px;
+  }
+
+  .session-next {
+    gap: 8px;
+    min-height: 0;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 16px;
+  }
+
+  .session-next-dot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .session-next-label {
+    font-size: 14px;
+  }
+
+  .session-next-time {
+    font-size: 26px;
+  }
+
+  .session-controls {
+    margin-top: auto;
+    padding: 0;
+  }
+
+  .session-skip {
+    width: 54px;
+    height: 54px;
+  }
+
+  .session-pause {
+    width: 80px;
+    height: 80px;
+  }
+}

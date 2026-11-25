@@ -1,0 +1,25 @@
+<!doctype html>
+<!-- English until the app starts; it then sets the language and the title itself (src/App.tsx). -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sport Timer</title>
+    <meta name="description" content="Workout timer: Tabata, rounds and intervals." />
+    <meta name="robots" content="noindex" />
+    <meta
+      name="viewport"
+      content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Home-screen behavior on iOS. Icons and theme color are injected by vite-plugin-pwa. -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Timer" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  </head>
+  <body style="background: #0f0f14">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
