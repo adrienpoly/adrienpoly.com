@@ -1,0 +1,134 @@
+.done {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding: calc(60px + env(safe-area-inset-top)) 20px calc(34px + env(safe-area-inset-bottom));
+  background: var(--ink);
+  overflow-y: auto;
+}
+
+.done-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.done-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 36px;
+  background: var(--lime);
+  box-shadow: 0 0 36px rgba(198, 255, 0, 0.45);
+  color: var(--ink);
+}
+
+.done-heading h1 {
+  margin: 0;
+  font-size: 76px;
+  line-height: 0.86;
+}
+
+.done-heading h1 span {
+  color: var(--lime);
+}
+
+.done-heading p {
+  margin: 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.done-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.done-stats > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px 12px;
+  border-radius: 20px;
+  background: var(--panel);
+}
+
+.done-stats .display {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.done-stats .is-highlight {
+  color: var(--lime);
+}
+
+.done-stats span:last-child {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.done-split {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 22px;
+  background: var(--panel);
+}
+
+.done-split h2 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+
+.done-split-bar {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.done-split-bar span {
+  flex-basis: 0;
+}
+
+.done-split-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.done-split-row span:first-child {
+  width: 12px;
+  height: 12px;
+  border-radius: 6px;
+}
+
+.done-split-row span:nth-child(2) {
+  flex: 1;
+  color: var(--soft);
+}
+
+.done-split-row .display {
+  font-size: 22px;
+}
+
+.done-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}

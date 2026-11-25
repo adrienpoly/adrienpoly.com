@@ -1,0 +1,66 @@
+.templates {
+  gap: 12px;
+}
+
+.templates h2 {
+  margin: 0;
+  font-size: 44px;
+  line-height: 0.9;
+}
+
+.templates h2 span {
+  color: var(--lime);
+}
+
+.templates p {
+  margin: 0 0 4px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.template {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: none;
+  border-radius: 20px;
+  background: var(--panel-raised);
+  text-align: left;
+  color: var(--muted);
+}
+
+.template-badge {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  font-size: 26px;
+  color: var(--ink);
+}
+
+.template-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.template-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.template-description {
+  font-size: 13px;
+}
+
+.template-bar {
+  height: 5px;
+  margin-top: 6px;
+}

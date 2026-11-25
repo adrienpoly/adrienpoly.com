@@ -1,0 +1,111 @@
+.duration {
+  gap: 18px;
+  padding-top: 22px;
+}
+
+.duration-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.duration-dot {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  /* `color` is set to the dot's color, so the glow follows it. */
+  box-shadow: 0 0 14px color-mix(in srgb, currentColor 60%, transparent);
+}
+
+.duration-heading h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 40px;
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+
+/* The name of a step: a text field that keeps the look of the heading. */
+.duration-heading input {
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  min-height: 52px;
+  padding: 4px 12px;
+  border: 2px solid var(--field-color, var(--line-strong));
+  border-radius: 14px;
+  background: var(--panel-raised);
+  font-size: 34px;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.duration-wheels {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.duration-wheels.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* The box around the selected row, behind both wheels. */
+.duration-highlight {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  height: 76px;
+  margin-top: -38px;
+  border: 2px solid var(--lime);
+  border-radius: 18px;
+  background: var(--panel-raised);
+}
+
+.duration-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.duration-shortcuts > span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.duration-shortcuts > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.duration-shortcuts button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 20px;
+  background: var(--panel-raised);
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.duration-shortcuts button[aria-pressed="true"] {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.duration-delete {
+  align-self: center;
+  margin: -6px 0 -10px;
+  font-size: 14px;
+  color: #ff5a6e;
+}

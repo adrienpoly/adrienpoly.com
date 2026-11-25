@@ -1,0 +1,70 @@
+.settings {
+  gap: 14px;
+}
+
+.settings-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-top h2 {
+  margin: 0;
+  font-size: 44px;
+  line-height: 0.9;
+}
+
+.settings-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.settings-label span:first-child {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.settings-choices {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: var(--panel-raised);
+  overflow: hidden;
+}
+
+.settings-choices button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px 16px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  text-align: left;
+  color: var(--lime);
+}
+
+.settings-choices button:last-child {
+  border-bottom: none;
+}
+
+.settings-choice-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.settings-choice-text span:first-child {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}

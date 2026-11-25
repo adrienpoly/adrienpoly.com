@@ -1,0 +1,53 @@
+/* Five rows of 54px are visible; the middle one is the value. */
+.wheel {
+  position: relative;
+  height: 270px;
+  padding: 108px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  font-weight: 800;
+  outline: none;
+  /* Rows fade out towards the top and bottom edges. */
+  -webkit-mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(transparent, #000 22%, #000 78%, transparent);
+}
+
+.wheel::-webkit-scrollbar {
+  display: none;
+}
+
+.wheel-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 54px;
+  scroll-snap-align: center;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--line-strong);
+  transition:
+    font-size 0.12s,
+    color 0.12s;
+}
+
+.wheel-row[data-distance="1"] {
+  font-size: 36px;
+  color: #6a6a78;
+}
+
+.wheel-row[data-distance="0"] {
+  font-size: 72px;
+  font-weight: 900;
+  color: var(--lime);
+}
+
+.wheel-unit {
+  margin-left: 6px;
+  font-family: var(--font-text);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: none;
+  color: #ffffff;
+}

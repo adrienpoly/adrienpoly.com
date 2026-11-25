@@ -1,0 +1,19 @@
+# Lessons
+
+## 2026-11-24 — A screenshot check that could not see the thing it was checking
+
+- Failure mode: I compared "390px wide" screenshots of the home page and called the mobile layout verified. Headless Chrome clamps the window to about 500px, so both shots were a wider layout cropped to 390.
+- Detection signal: on a new page, text was cut off at the right edge of the "mobile" screenshot although the CSS had no overflow.
+- Prevention rule: before trusting a visual check, confirm the tool renders the size asked for (for example, look for clipped content or log `innerWidth`). For phone widths, render through an iframe of the exact size.
+
+## 2026-11-24 — Porting HTML into Astro changed whitespace
+
+- Failure mode: moving `index.html` into an `.astro` file removed the space between a text node and the `<span>` on the next line, joining two words.
+- Detection signal: pixel comparison against the baseline showed a shifted line of text.
+- Prevention rule: when porting markup into a framework that minifies HTML, compare rendered output against a baseline, and write significant spaces explicitly (`{" "}`).
+
+## Changing the root of the React tree broke every Ionic modal (2026-11-25)
+
+- **Failure mode**: I wrapped `<IonApp>` in a context provider in the loaded render only, while the loading render still returned a bare `<IonApp />`. React replaced the `<ion-app>` element. Ionic React's modals read `document.querySelector("ion-app")` in their constructor, during that same render, so they attached to the element that was about to be removed. Every sheet and modal stopped opening.
+- **Detection signal**: no error anywhere. Type check, unit tests and build all passed. Only the browser walk showed it: a click on a button that opens a sheet did nothing.
+- **Prevention rule**: keep `<IonApp>` as the root element of every render (providers go inside it). After any change to the structure of `App.tsx`, open at least one sheet in a browser before calling it done; the automated checks cannot see this.

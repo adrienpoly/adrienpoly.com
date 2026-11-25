@@ -1,0 +1,13 @@
+.sequence-bar {
+  display: flex;
+  gap: 2px;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sequence-bar span {
+  flex-basis: 0;
+  min-width: 1px;
+  border-radius: 2px;
+}

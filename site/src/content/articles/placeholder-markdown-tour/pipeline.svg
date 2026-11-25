@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15">
+  <rect width="720" height="200" fill="#111112"/>
+  <g fill="#161617" stroke="#2a2824">
+    <rect x="40" y="70" width="160" height="60" rx="10"/>
+    <rect x="280" y="70" width="160" height="60" rx="10"/>
+    <rect x="520" y="70" width="160" height="60" rx="10"/>
+  </g>
+  <g fill="#fafaf7" text-anchor="middle">
+    <text x="120" y="105">index.md</text>
+    <text x="360" y="105">astro build</text>
+    <text x="600" y="105">Static HTML</text>
+  </g>
+  <g stroke="#b3211c" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M210 100h60m-8-7 8 7-8 7"/>
+    <path d="M450 100h60m-8-7 8 7-8 7"/>
+  </g>
+</svg>
