@@ -1,5 +1,5 @@
 import { IonModal } from "@ionic/react";
-import { CheckIcon } from "../components/icons";
+import { CheckIcon, ChevronIcon } from "../components/icons";
 import { LANGUAGE_NAMES, LANGUAGES, type LanguageSetting } from "../i18n/language";
 import { useMessages } from "../i18n/useMessages";
 import "./SettingsSheet.css";
@@ -8,11 +8,13 @@ interface Props {
   isOpen: boolean;
   language: LanguageSetting;
   onChange: (language: LanguageSetting) => void;
+  /** Set while the app is not installed: adds the entry that leads to the install steps. */
+  onInstall?: () => void;
   onClose: () => void;
 }
 
-/** The app's settings. For now: the language of the texts and of the voice. */
-export function SettingsSheet({ isOpen, language, onChange, onClose }: Props) {
+/** The app's settings: the language of the texts and of the voice, and the way to install the app. */
+export function SettingsSheet({ isOpen, language, onChange, onInstall, onClose }: Props) {
   const t = useMessages();
 
   const choices: Array<{ value: LanguageSetting; label: string; hint?: string }> = [
@@ -56,6 +58,18 @@ export function SettingsSheet({ isOpen, language, onChange, onClose }: Props) {
             </button>
           ))}
         </div>
+
+        {onInstall && (
+          <div className="settings-choices">
+            <button onClick={onInstall}>
+              <span className="settings-choice-text">
+                <span>{t.install.title}</span>
+                <span>{t.install.pitch}</span>
+              </span>
+              <ChevronIcon />
+            </button>
+          </div>
+        )}
       </div>
     </IonModal>
   );

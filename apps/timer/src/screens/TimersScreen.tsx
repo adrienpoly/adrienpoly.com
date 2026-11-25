@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   IonContent,
   IonItem,
@@ -12,7 +12,6 @@ import { PlayIcon, PlusIcon, SettingsIcon, TrashIcon } from "../components/icons
 import { SequenceBar } from "../components/SequenceBar";
 import { useMessages } from "../i18n/useMessages";
 import { buildPhases, formatDuration, summarize, totalSeconds, type Timer } from "../model/timer";
-import { InstallHint } from "../pwa/InstallHint";
 import "./TimersScreen.css";
 
 interface Props {
@@ -22,13 +21,23 @@ interface Props {
   onStart: (timer: Timer) => void;
   onDelete: (timer: Timer) => void;
   onSettings: () => void;
+  /** Shown between the title and the list: the invitation to install the app. */
+  notice?: ReactNode;
 }
 
 /**
  * Screen 1: the saved timers. Tap a name to edit, the round button to start,
  * slide a card to the left to delete it.
  */
-export function TimersScreen({ timers, onNew, onEdit, onStart, onDelete, onSettings }: Props) {
+export function TimersScreen({
+  timers,
+  onNew,
+  onEdit,
+  onStart,
+  onDelete,
+  onSettings,
+  notice,
+}: Props) {
   const [presentAlert] = useIonAlert();
   const t = useMessages();
 
@@ -60,6 +69,8 @@ export function TimersScreen({ timers, onNew, onEdit, onStart, onDelete, onSetti
             </h1>
             {timers.length === 0 && <p>{t.timers.empty}</p>}
           </div>
+
+          {notice}
 
           <ul className="timers-list">
             {timers.map((timer) => {
@@ -112,8 +123,6 @@ export function TimersScreen({ timers, onNew, onEdit, onStart, onDelete, onSetti
               );
             })}
           </ul>
-
-          <InstallHint />
         </div>
 
         {/* slot="fixed": stays in the corner of the screen while the list scrolls under it. */}

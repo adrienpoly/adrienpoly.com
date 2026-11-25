@@ -32,6 +32,19 @@ export const PlusIcon = ({ size = 22, weight = 3 }: IconProps) => (
   </svg>
 );
 
+export const InstallIcon = ({ size = 24, weight = 2.4 }: IconProps) => (
+  <svg {...line(size, weight)}>
+    <path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 20h14" />
+  </svg>
+);
+
+/** The Share button of iOS: an arrow coming out of a box. */
+export const ShareIcon = ({ size = 24, weight = 2 }: IconProps) => (
+  <svg {...line(size, weight)}>
+    <path d="M12 15V3M8 7l4-4 4 4M8 11H6a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-2" />
+  </svg>
+);
+
 export const CloseIcon = ({ size = 18, weight = 2.6 }: IconProps) => (
   <svg {...line(size, weight)}>
     <path d="M6 6l12 12M18 6L6 18" />

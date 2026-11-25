@@ -4,7 +4,10 @@ import { MESSAGES, resolveLanguage } from "./i18n/language";
 import { MessagesContext } from "./i18n/useMessages";
 import type { Timer } from "./model/timer";
 import { unlockCues } from "./platform/cues";
+import { InstallCard } from "./pwa/InstallCard";
+import { InstallSheet } from "./pwa/InstallSheet";
 import { UpdatePrompt } from "./pwa/UpdatePrompt";
+import { useInstall } from "./pwa/useInstall";
 import { DoneScreen } from "./screens/DoneScreen";
 import { EditorScreen } from "./screens/EditorScreen";
 import { SessionScreen, type SessionResult } from "./screens/SessionScreen";
@@ -30,6 +33,8 @@ export function App() {
   const [screen, setScreen] = useState<Screen>({ name: "timers" });
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const install = useInstall();
+  const [installOpen, setInstallOpen] = useState(false);
   // The draft stays set while the editor animates out, so its content stays visible.
   const [draft, setDraft] = useState<Timer | null>(null);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -37,6 +42,13 @@ export function App() {
   function edit(timer: Timer) {
     setDraft(timer);
     setEditorOpen(true);
+  }
+
+  /** The browser's own install dialog where there is one (it needs a tap), the steps otherwise. */
+  function startInstall() {
+    const showSteps = () => setInstallOpen(true);
+    if (install.canPrompt) install.prompt(showSteps);
+    else showSteps();
   }
 
   /** Must be called from a tap: that is what allows sound and speech to play. */
@@ -69,13 +81,36 @@ export function App() {
           onStart={start}
           onDelete={(timer) => remove(timer.id)}
           onSettings={() => setSettingsOpen(true)}
+          notice={
+            install.showCard && (
+              <InstallCard
+                canPrompt={install.canPrompt}
+                onInstall={startInstall}
+                onHide={install.hideCard}
+              />
+            )
+          }
         />
 
         <SettingsSheet
           isOpen={settingsOpen}
           language={setting}
           onChange={choose}
+          onInstall={
+            install.available
+              ? () => {
+                  setSettingsOpen(false);
+                  startInstall();
+                }
+              : undefined
+          }
           onClose={() => setSettingsOpen(false)}
+        />
+
+        <InstallSheet
+          isOpen={installOpen}
+          guide={install.guide}
+          onClose={() => setInstallOpen(false)}
         />
 
         <TemplatesSheet

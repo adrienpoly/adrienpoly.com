@@ -165,3 +165,49 @@ Decisions to confirm:
 - Asked by the user: title on one line, subtitle removed, settings button kept at the top, "+" moved to the bottom right as a floating button (`slot="fixed"` in `IonContent`).
 - The title is 60px where it fits and shrinks with the screen (`min(60px, 14vw)`). The empty-list message is kept, shown only when there is no timer.
 - Verified: check, 26 tests, build; in headless Chrome the title is on one line at 320, 390 and 430 wide in both languages, the last card scrolls clear of the button, the button opens the templates, no console errors.
+
+## Timer: install invitation and opening the installed app — 2026-11-25
+
+Branch `feat/timer-install-prompt`. Asked by the user: outside the installed app, invite the user to install the PWA and show how; make a visit to timer.adrienpoly.com open the installed app.
+
+Acceptance criteria:
+
+- In a browser tab, the home screen shows an install card under the title. Inside the installed app (standalone display, or a native wrapper) it never shows.
+- Where the browser offers an install prompt (Chrome, Edge), the card's button opens it. Elsewhere it opens a sheet with the steps for this browser: iPhone/iPad, Safari on a Mac, Android, other desktop browsers.
+- The card can be hidden; that choice is kept. The settings sheet keeps an "Install the app" entry while the app is not installed.
+- English and French.
+- A link that the browser hands to the installed app reuses the open window instead of opening a second one (Chromium only, `launch_handler`).
+
+Checklist:
+
+- [x] Failing tests for the choice of install steps (`installGuide`)
+- [x] `src/pwa/`: guide detection, install prompt store, `useInstall`, card and sheet
+- [x] Messages in `en.ts` and `fr.ts`; remove the old one-line hint
+- [x] Settings entry
+- [x] Manifest `launch_handler`
+- [x] Verify: check, tests, build; browser walk (iPhone, Android and desktop user agents, simulated install prompt, standalone display, hide + reload, settings entry, both languages)
+- [x] Update `CLAUDE.md`, write Results
+
+Working notes:
+
+- A website cannot open an installed PWA by itself. iOS never hands a URL to a Home Screen web app. Android opens the installed app for links tapped in other apps; Chrome and Edge on desktop capture links and show "Open in app" in the address bar. A URL typed in the address bar always stays in the browser.
+- `beforeinstallprompt` fires once, early, so its listener is registered when the module loads, not in a component.
+- A scripted click is not a user gesture: Chrome then rejects `prompt()`. That showed a tap with no effect, so `promptInstall` takes a fallback that opens the steps.
+- CDP's `Emulation.setEmulatedMedia` does not emulate `display-mode` (logged `matches`: false). The installed state is simulated by stubbing what the code reads (`matchMedia`, `navigator.standalone`) before the page loads.
+
+Results:
+
+- New in `apps/timer/src/pwa/`: `installGuide.ts` (+ test), `installStore.ts`, `useInstall.ts`, `InstallCard.tsx`, `InstallSheet.tsx`, `Install.css`. `InstallHint.tsx` and its one-line message are removed.
+- `App.tsx` wires the card (through the new `notice` slot of `TimersScreen`), the sheet and the settings entry (`onInstall` on `SettingsSheet`). Messages `install` in `en.ts` and `fr.ts`. Two icons. `launch_handler` in the manifest (`vite.config.ts`).
+- The choice to hide the card is kept under the Preferences key `installCardHidden`.
+
+How it was verified:
+
+- `pnpm check` (0 errors), `pnpm test` (32 passed, 6 new), `pnpm build`; the built manifest contains `launch_handler`.
+- Headless Chrome, dev server and production build: card under the title in French and English, at 390 and 320 wide; steps sheet for iPhone, Android, Safari on a Mac and desktop, in both languages; hide → gone, still gone after reload; settings entry opens the steps; simulated install event → button "Install", one call to `prompt`, then back to the steps; `appinstalled` → card and settings entry gone; installed display (both ways of detecting it) → no card, no settings entry; no console errors.
+- Production build in real Chrome: the real install event arrives and the button reads "Install"; a real tap is accepted; a refused call opens the steps.
+
+Not verified:
+
+- The wording against a real iPhone (where Safari puts Share, the exact label of "Add to Home Screen"), a real Android phone and Safari on a Mac.
+- `launch_handler`: only its presence in the manifest. Its effect needs an installed app in Chrome or Edge.

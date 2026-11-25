@@ -24,6 +24,9 @@ export default defineConfig({
         orientation: "any",
         theme_color: "#0f0f14",
         background_color: "#0f0f14",
+        // When the browser hands a link to the installed app (Chrome, Edge), bring the
+        // open window forward instead of loading a second one over a running session.
+        launch_handler: { client_mode: ["focus-existing", "auto"] },
       },
       workbox: {
         // Fonts are bundled, so the app looks the same offline.

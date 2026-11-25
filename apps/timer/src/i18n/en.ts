@@ -163,8 +163,41 @@ export const en = {
     automaticHint: "The language of this device",
   },
 
+  install: {
+    title: "Install the app",
+    pitch: "Full screen, works offline, on your Home Screen.",
+    install: "Install",
+    showSteps: "Show me how",
+    hide: "Hide the invitation to install",
+    steps: {
+      ios: [
+        "Tap the Share button of the browser. In Safari on a recent iPhone, it is in the ••• menu.",
+        "Scroll down and tap “Add to Home Screen”.",
+        "Tap “Add”.",
+      ],
+      macSafari: ["In the menu bar, open “File”.", "Choose “Add to Dock”.", "Click “Add”."],
+      android: [
+        "Open the menu of the browser (⋮).",
+        "Tap “Install app” or “Add to Home screen”.",
+        "Confirm with “Install”.",
+      ],
+      desktop: [
+        "Click the install icon at the right of the address bar, or open the menu of the browser.",
+        "Choose “Install Sport Timer”.",
+        "Confirm with “Install”.",
+      ],
+    },
+    notes: {
+      ios: "No Share button? Open this page in Safari.",
+      macSafari: "Needs macOS Sonoma or later.",
+      android: "Nothing like it in the menu? Open this page in Chrome.",
+      desktop: "Chrome and Edge can install apps. Firefox cannot.",
+    },
+    alreadyInstalled:
+      "Already installed? Open it from its icon: a browser tab cannot switch to the app by itself.",
+  },
+
   pwa: {
-    installHint: "To install the app: tap Share, then “Add to Home Screen”.",
     offlineReady: "Ready to work offline.",
     updateAvailable: "A new version is available.",
     later: "Later",
