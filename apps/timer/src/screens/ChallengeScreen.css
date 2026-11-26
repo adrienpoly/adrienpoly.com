@@ -1,0 +1,205 @@
+/* A full screen over the list of timers, like the end of a session. */
+.challenge {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  background: var(--ink);
+}
+
+.challenge-scroll {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 18px;
+  min-height: 0;
+  padding: env(safe-area-inset-top) 16px 24px;
+  overflow-y: auto;
+}
+
+/* A scrolling column must not squeeze its blocks to fit them all on the screen. */
+.challenge-scroll > * {
+  flex-shrink: 0;
+}
+
+.challenge-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 4px 0;
+}
+
+.challenge-round {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  border-radius: 24px;
+  background: var(--panel);
+  color: var(--soft);
+}
+
+.challenge-heading {
+  padding: 0 4px;
+}
+
+.challenge-heading h1 {
+  margin: 0;
+  font-size: min(60px, 14vw);
+  line-height: 0.9;
+  letter-spacing: 0.5px;
+  overflow-wrap: anywhere;
+}
+
+/* The goal, with a dot in the color of the challenge. */
+.challenge-heading p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.challenge-heading p::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--timer-color);
+}
+
+.challenge-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 22px;
+  background: var(--panel);
+}
+
+.challenge-panel h2,
+.challenge-history h2 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+
+.challenge-history {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.challenge-history-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.challenge-history-top button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  border-radius: 22px;
+  background: var(--panel);
+  color: var(--lime);
+}
+
+.challenge-empty {
+  margin: 0;
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* One panel for all the results; each one slides left over its delete button. */
+.challenge-results {
+  margin: 0;
+  padding: 0;
+  border-radius: 22px;
+  background: var(--panel);
+  list-style: none;
+  overflow: hidden;
+}
+
+.challenge-results li + li {
+  border-top: 1px solid var(--line);
+}
+
+/* ion-item is only there because ion-item-sliding moves it: strip its own look. */
+.challenge-results ion-item {
+  --background: var(--panel);
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 0;
+}
+
+.challenge-result {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  color: #ffffff;
+}
+
+.challenge-result-date {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--soft);
+}
+
+.challenge-result-best {
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: var(--lime);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.challenge-result-difference {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.challenge-result-difference.is-better {
+  font-weight: 700;
+  color: var(--lime);
+}
+
+.challenge-result-time {
+  min-width: 64px;
+  font-size: 30px;
+  line-height: 1;
+  text-align: right;
+}
+
+.challenge-footer {
+  flex-shrink: 0;
+  padding: 14px 20px calc(24px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  border-radius: 28px 28px 0 0;
+  background: var(--sheet);
+}

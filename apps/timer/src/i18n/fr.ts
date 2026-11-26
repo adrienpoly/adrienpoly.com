@@ -16,6 +16,7 @@ export const fr: Messages = {
     rounds: "Rounds",
     lapTimer: "Chronomètre à tours",
     newTimer: "Nouveau minuteur",
+    challenge: "Défi",
     classicTabata: "Tabata classique",
     morningCore: "Gainage matin",
     boxing: "Boxe 3 rounds",
@@ -64,6 +65,7 @@ export const fr: Messages = {
       tabata: { name: "Tabata", description: "Effort / repos × rounds × cycles" },
       rounds: { name: "Rounds", description: "Exercice + repos, répété N fois" },
       laps: { name: "Chronomètre à tours", description: "Un bip à chaque tour de temps" },
+      challenge: { name: "Défi", description: "Un chronomètre qui garde tes résultats" },
       blank: { name: "Vierge", description: "Compose tes propres étapes" },
     },
   },
@@ -95,6 +97,9 @@ export const fr: Messages = {
     saveAndStart: "Enregistrer et lancer",
     deleteTimer: "Supprimer le minuteur",
     confirmDelete: (name) => `Supprimer « ${name} » ?`,
+    challengeName: "Nom du défi",
+    challengeSection: "Défi",
+    deleteChallenge: "Supprimer le défi",
   },
 
   duration: {
@@ -137,6 +142,58 @@ export const fr: Messages = {
     other: "Préparation / récupération",
     restart: "Recommencer",
     back: "Retour aux minuteurs",
+  },
+
+  challenge: {
+    goal: "Objectif",
+    goals: {
+      shortest: {
+        label: "Le plus vite",
+        hint: "Le temps le plus court est le meilleur. Par exemple : 20 pompes.",
+      },
+      longest: {
+        label: "Le plus longtemps",
+        hint: "Le temps le plus long est le meilleur. Par exemple : rester suspendu à une barre.",
+      },
+    },
+    summary: (goal, results) =>
+      results === 0
+        ? `Défi · ${goal === "shortest" ? "le plus vite" : "le plus longtemps"}`
+        : `Record sur ${plural(results, "essai")}`,
+    confirmDelete: (name) => `Supprimer « ${name} » et ses résultats ?`,
+
+    back: "Retour aux minuteurs",
+    edit: "Modifier le défi",
+    best: "Record",
+    last: "Dernier",
+    attempts: "Essais",
+    progress: "Progression",
+    chartLabel: (results) => `Progression sur ${plural(results, "résultat")}`,
+    history: "Historique",
+    add: "Ajouter un résultat",
+    empty: "Aucun résultat. Lance le défi, ou ajoute un résultat à la main avec le bouton +.",
+    start: "Démarrer",
+
+    go: "Go !",
+    finish: "Terminé",
+    bestSoFar: (time) => `record ${time}`,
+    sayGo: "C’est parti",
+    sayRecord: "Nouveau record",
+    voiceHint: "« Préparer », « C’est parti », « Nouveau record »",
+
+    recordTitle: ["Nouveau", "record !"],
+    time: "Temps",
+    first: "Premier résultat enregistré.",
+    better: (gap, best) => `${gap} de mieux que ton ancien record (${best}).`,
+    equal: (best) => `Record égalé (${best}).`,
+    worse: (gap, best) => `À ${gap} de ton record (${best}).`,
+    seeHistory: "Voir l’historique",
+    discard: "Ne pas garder ce résultat",
+
+    newResult: "Nouveau résultat",
+    correctResult: "Corriger le résultat",
+    date: "Date",
+    deleteResult: "Supprimer le résultat",
   },
 
   settings: {

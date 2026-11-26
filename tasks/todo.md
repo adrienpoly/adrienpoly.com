@@ -264,3 +264,54 @@ How it was verified:
 Not verified:
 
 - How the variants sound, and their relative loudness: nobody has listened to them yet.
+
+## Timer: challenges with a history of results — 2026-11-26
+
+Branch `feat/timer-challenges`. Asked by the user: a kind of timer that keeps its results, to follow progress over time (20 push-ups as fast as possible; hanging from a bar as long as possible). Results can be corrected, added by hand and deleted.
+
+Acceptance criteria:
+
+- "Challenge" is a fifth template. A challenge has a name, a color, a preparation time and a goal: the shortest time or the longest time.
+- A challenge is in the same list as the timers. Its card shows the best result and, from two results on, a small curve. Tapping its name opens the page of the challenge; the start button starts an attempt.
+- An attempt: the preparation counts down with the usual cues, then a stopwatch counts up until the user taps one large button. The result is saved by itself.
+- The end screen shows the time and how it compares with the best one, according to the goal. One link discards the result.
+- The page of a challenge shows the best, the last, the number of attempts, a chart and the list of results. A result is deleted by sliding it to the left or from its sheet, corrected by tapping it, added with a "+" (date and time).
+- Deleting a challenge deletes its results. Timers with intervals behave as before.
+- English and French. No new dependency. Results stay on the device (Capacitor Preferences).
+
+Checklist:
+
+- [x] Failing tests: attempt clock, best result by goal, history with the gap to the best so far, reading stored results, dates
+- [x] Model: `challenge` on `Timer`, template, `src/model/challenge.ts`
+- [x] Storage: `src/storage/useResults.ts`
+- [x] Screens: attempt, end, page of the challenge (chart, list), result sheet; editor and home card for a challenge
+- [x] Verify: check, tests, build; in a browser: the whole path in both languages and both goals, 390 and 320 wide, landscape, add / correct / delete, delete the challenge, timers unchanged
+- [x] Results, `CLAUDE.md`
+
+Working notes:
+
+- A challenge is a `Timer` with a `challenge` field and no steps, not a second type: storage, names, colors, options, the list and its order are shared. The cost is a few unused fields on a challenge.
+- Results are stored apart from the timers (key `results`, by timer id), so that saving a timer from the editor can never overwrite them.
+- Whole seconds: the tap that stops the stopwatch is not more precise than that, and the result can be corrected.
+- The page of the challenge is a layer between the list and the session, held by its own state in `App.tsx`: an attempt started from the page comes back to it.
+- With five templates the template sheet was taller than a short screen and its last entries were cut off (it already was at 320 × 568 with four). It now limits its height and scrolls.
+- The chart plots the results in the order of the attempts, evenly spaced, not on a time scale: several attempts on the same day would otherwise fall on one point.
+
+Results:
+
+- Model: `challenge?: { goal }` on `Timer`, a "Challenge" template, `canStart`; `src/model/challenge.ts` (attempt clock, record, history, reading stored results, dates of a result).
+- Storage: `src/storage/useResults.ts` (Preferences key `results`).
+- Screens: `ChallengeSession`, `ChallengeDoneScreen`, `ChallengeScreen`, `ResultSheet`; `src/components/ResultsChart.tsx` (chart and card curve). The editor shows a goal and a preparation for a challenge, in place of the intervals. The home card shows the record and a curve. The stat tiles of the end screen moved to `theme.css` (`.stats`) to be shared.
+- `App.tsx`: the page of a challenge (`challengeId`), the attempt and its end screen; deleting a challenge deletes its results.
+- Texts in English and French (`challenge` section, `names.challenge`, a template entry).
+
+How it was verified:
+
+- `pnpm check` (0 errors), `pnpm test` (63 passed, 22 new), `pnpm build`.
+- Headless Chrome, on the dev server and on the production build, in French at 390 × 844: create a challenge from the template, name it, switch the goal; home card without result, then with a record and a curve; page empty, then with 7 results (record, last, attempts, chart, list with gaps and the record marked); touching the chart and the arrow keys select a result; an attempt (cyan preparation with the button disabled, three beeps, "Go" in lime, voice "Préparer" then "C’est parti"), the result saved on the tap; end screen with "Nouveau record" and the gap; discard removes the result; correct a result with the wheels, delete it from the sheet, delete another by sliding; change the goal to the longest time and the record moves; stop an attempt comes back to the page; deleting the challenge from the editor empties its results; a plain timer still opens its editor and runs. No console errors.
+- English at 320 × 568 with 45 results and no preparation, the attempt rotated by hand and in real landscape (844 × 390), a challenge with one result (no chart, no curve), the template sheet at 390 × 664 and 320 × 568 (scrolls up and down, closes when pulled down from the top, last template reachable).
+
+Not verified:
+
+- Anything on a real iPhone: the size of the "Done" button in the hand, the date field of the result sheet (Safari shows its own picker), scrolling the template sheet with a finger, sliding a result to delete it.
+- A result of 100 minutes or more: the wheels of the result sheet stop at 99:59, so correcting such a result would cut it down.

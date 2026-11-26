@@ -23,3 +23,9 @@
 - **Failure mode**: `CLAUDE.md` already listed "sound with the ringer switch off" as something only an iPhone could confirm. The app shipped without telling the user anything about it. The first test on a phone in Silent Mode looked like broken sound. I then asked "are you in silent mode?" without saying where to look: the user checked the Control Center, which does not show it, and answered no.
 - **Detection signal**: on the device, the simplest possible case (one phrase spoken from a tap) was silent too, and only the variants that bypass Silent Mode made a sound.
 - **Prevention rule**: when a platform can silently disable a feature and the app cannot detect it, ship a visible hint with the feature. When asking a user to check a device setting, say exactly where it is. For a bug I cannot reproduce, build a page of isolated variants for the user to run before changing the code.
+
+## A sheet grew past the screen and nothing said so (2026-11-26)
+
+- **Failure mode**: adding a fifth template made the template sheet taller than a short screen. A sheet is as tall as its content, so the last entries were simply cut off, with no scrolling. It was already the case at 320 × 568 with four templates, and I had not seen it: I had checked that screen size for other sheets only.
+- **Detection signal**: at 390 × 844 the sheet ended exactly at the bottom of the screen (`body 125→844 of 844`). A fit with zero margin on the largest test size means an overflow on every smaller one.
+- **Prevention rule**: after adding anything to a bottom sheet, measure it at 320 × 568 and at 390 × 664 (Safari with its bars), not only at the full iPhone size. A sheet that can outgrow the screen must scroll (see `CLAUDE.md`).

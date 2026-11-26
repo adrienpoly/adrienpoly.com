@@ -135,6 +135,40 @@ input {
   color: #ffffff;
 }
 
+/* Three figures side by side, each in its tile: a big number over its label. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stats > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px 12px;
+  border-radius: 20px;
+  background: var(--panel);
+}
+
+.stats .display {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.stats .is-highlight {
+  color: var(--lime);
+}
+
+.stats span:last-child {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* Bottom sheets (ion-modal with breakpoints): as tall as their content. */
 ion-modal.sheet {
   --height: auto;

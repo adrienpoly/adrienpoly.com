@@ -1,5 +1,12 @@
+/* Five templates are taller than a short screen: the sheet then stops under the status bar and scrolls. */
 .templates {
   gap: 12px;
+  max-height: calc(100dvh - env(safe-area-inset-top) - 12px);
+  overflow-y: auto;
+}
+
+.templates > * {
+  flex-shrink: 0;
 }
 
 .templates h2 {

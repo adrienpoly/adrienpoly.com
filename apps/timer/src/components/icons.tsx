@@ -57,6 +57,19 @@ export const ChevronIcon = ({ size = 18, weight = 2 }: IconProps) => (
   </svg>
 );
 
+export const BackIcon = ({ size = 20, weight = 2.4 }: IconProps) => (
+  <svg {...line(size, weight)}>
+    <path d="M15 6l-6 6 6 6" />
+  </svg>
+);
+
+/** A pencil. */
+export const EditIcon = ({ size = 20, weight = 2.2 }: IconProps) => (
+  <svg {...line(size, weight)}>
+    <path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" />
+  </svg>
+);
+
 export const CheckIcon = ({ size = 34, weight = 3 }: IconProps) => (
   <svg {...line(size, weight)}>
     <path d="M5 12.5l4.5 4.5L19 7.5" />

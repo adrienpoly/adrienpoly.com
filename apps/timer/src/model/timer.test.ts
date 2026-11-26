@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPhases,
+  canStart,
   createStarterTimers,
   formatDuration,
   summarize,
@@ -75,5 +76,29 @@ describe("summarize", () => {
     const laps = TEMPLATES.find((template) => template.id === "laps")!.create(names);
 
     expect(summarize(laps, en.counts.cycles)).toBe("6 × 1:00");
+  });
+});
+
+describe("the challenge template", () => {
+  const challenge = TEMPLATES.find((template) => template.id === "challenge")!.create(names);
+
+  it("is a timer without steps: only the preparation is a phase", () => {
+    expect(challenge.challenge).toEqual({ goal: "shortest" });
+    expect(phases(challenge).map((phase) => phase.kind)).toEqual(["prepare"]);
+  });
+
+  it("can start even without a preparation, unlike a timer without phases", () => {
+    const direct = { ...challenge, prepareSeconds: 0 };
+    const empty = { ...direct, challenge: undefined };
+
+    expect(phases(direct)).toEqual([]);
+    expect(canStart(direct, phases(direct))).toBe(true);
+    expect(canStart(empty, phases(empty))).toBe(false);
+  });
+
+  it("is the only template that is a challenge", () => {
+    const challenges = TEMPLATES.filter((template) => template.create(names).challenge);
+
+    expect(challenges.map((template) => template.id)).toEqual(["challenge"]);
   });
 });

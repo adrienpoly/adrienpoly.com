@@ -1,0 +1,21 @@
+.result-date {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.result-date input {
+  box-sizing: border-box;
+  min-height: 46px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 14px;
+  background: var(--panel-raised);
+  font: 700 16px var(--font-text);
+  color: #ffffff;
+  /* The browser's own calendar and its icon, in their dark version. */
+  color-scheme: dark;
+}

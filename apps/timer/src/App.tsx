@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { IonApp, IonToast } from "@ionic/react";
 import { MESSAGES, resolveLanguage } from "./i18n/language";
 import { MessagesContext } from "./i18n/useMessages";
+import { bestResult, createResult, history, type HistoryEntry } from "./model/challenge";
 import type { Timer } from "./model/timer";
 import { unlockCues } from "./platform/cues";
 import { useSilentModeHint } from "./platform/useSilentModeHint";
@@ -9,6 +10,9 @@ import { InstallCard } from "./pwa/InstallCard";
 import { InstallSheet } from "./pwa/InstallSheet";
 import { UpdatePrompt } from "./pwa/UpdatePrompt";
 import { useInstall } from "./pwa/useInstall";
+import { ChallengeDoneScreen } from "./screens/ChallengeDoneScreen";
+import { ChallengeScreen } from "./screens/ChallengeScreen";
+import { ChallengeSession } from "./screens/ChallengeSession";
 import { DoneScreen } from "./screens/DoneScreen";
 import { EditorScreen } from "./screens/EditorScreen";
 import { SessionScreen, type SessionResult } from "./screens/SessionScreen";
@@ -17,6 +21,7 @@ import { SoundsSheet } from "./screens/SoundsSheet";
 import { TemplatesSheet } from "./screens/TemplatesSheet";
 import { TimersScreen } from "./screens/TimersScreen";
 import { useLanguageSetting } from "./storage/useLanguageSetting";
+import { useResults } from "./storage/useResults";
 import { useSoundChoice } from "./storage/useSoundChoice";
 import { useTimers } from "./storage/useTimers";
 
@@ -25,7 +30,9 @@ type Screen =
   | { name: "timers" }
   // `run` changes on every start, so restarting the same timer gives a fresh session.
   | { name: "session"; timer: Timer; run: number }
-  | { name: "done"; result: SessionResult };
+  | { name: "done"; result: SessionResult }
+  // The end of an attempt at a challenge: the result is already saved.
+  | { name: "attemptDone"; timerId: string; resultId: string };
 
 export function App() {
   const { setting, choose } = useLanguageSetting();
@@ -33,7 +40,11 @@ export function App() {
   const language = resolveLanguage(setting ?? "auto", navigator.languages);
   const messages = MESSAGES[language];
   const { timers, save, remove } = useTimers(language);
+  const { results, save: saveResult, remove: removeResult, removeAll: removeResults } = useResults();
   const [screen, setScreen] = useState<Screen>({ name: "timers" });
+  // The challenge whose page is open, between the list and a session: an
+  // attempt started from the page comes back to it.
+  const [challengeId, setChallengeId] = useState<string | null>(null);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const install = useInstall();
@@ -48,6 +59,18 @@ export function App() {
   function edit(timer: Timer) {
     setDraft(timer);
     setEditorOpen(true);
+  }
+
+  /** A challenge goes with its results. */
+  function removeTimer(timer: Timer) {
+    remove(timer.id);
+    if (timer.challenge) removeResults(timer.id);
+    if (timer.id === challengeId) setChallengeId(null);
+  }
+
+  function showChallenge(timerId: string) {
+    setChallengeId(timerId);
+    setScreen({ name: "timers" });
   }
 
   /** The browser's own install dialog where there is one (it needs a tap), the steps otherwise. */
@@ -71,22 +94,27 @@ export function App() {
     document.title = messages.appName;
   }, [messages]);
 
-  // Nothing to draw until the timers and the language have been read from storage.
+  // Nothing to draw until the timers, the results and the language have been read from storage.
   // <IonApp> must be the root here and below, so that React keeps the same
   // <ion-app> element: Ionic's modals look it up once, when they are created.
-  if (timers === null || setting === null) return <IonApp />;
+  if (timers === null || results === null || setting === null) return <IonApp />;
 
   const draftIsSaved = draft !== null && timers.some((timer) => timer.id === draft.id);
+  const resultsOf = (timer: Timer) => results[timer.id] ?? [];
+  const challenge = timers.find((timer) => timer.id === challengeId);
+  const attempted =
+    screen.name === "attemptDone" ? timers.find((timer) => timer.id === screen.timerId) : undefined;
 
   return (
     <IonApp>
       <MessagesContext.Provider value={messages}>
         <TimersScreen
           timers={timers}
+          results={results}
           onNew={() => setTemplatesOpen(true)}
-          onEdit={edit}
+          onOpen={(timer) => (timer.challenge ? showChallenge(timer.id) : edit(timer))}
           onStart={start}
-          onDelete={(timer) => remove(timer.id)}
+          onDelete={removeTimer}
           onSettings={() => setSettingsOpen(true)}
           notice={
             install.showCard && (
@@ -98,6 +126,19 @@ export function App() {
             )
           }
         />
+
+        {screen.name === "timers" && challenge?.challenge && (
+          <ChallengeScreen
+            timer={challenge}
+            goal={challenge.challenge.goal}
+            results={resultsOf(challenge)}
+            onBack={() => setChallengeId(null)}
+            onEdit={() => edit(challenge)}
+            onStart={() => start(challenge)}
+            onSaveResult={(result) => saveResult(challenge.id, result)}
+            onDeleteResult={(result) => removeResult(challenge.id, result.id)}
+          />
+        )}
 
         <SettingsSheet
           isOpen={settingsOpen}
@@ -156,7 +197,7 @@ export function App() {
           onDelete={
             draftIsSaved
               ? (timer) => {
-                  remove(timer.id);
+                  removeTimer(timer);
                   setEditorOpen(false);
                 }
               : undefined
@@ -167,13 +208,43 @@ export function App() {
           }}
         />
 
-        {screen.name === "session" && (
+        {screen.name === "session" && !screen.timer.challenge && (
           <SessionScreen
             key={screen.run}
             timer={screen.timer}
             sounds={sounds}
             onStop={() => setScreen({ name: "timers" })}
             onFinish={showResult}
+          />
+        )}
+
+        {screen.name === "session" && screen.timer.challenge && (
+          <ChallengeSession
+            key={screen.run}
+            timer={screen.timer}
+            goal={screen.timer.challenge.goal}
+            best={bestResult(resultsOf(screen.timer), screen.timer.challenge.goal)?.seconds}
+            sounds={sounds}
+            onStop={() => setScreen({ name: "timers" })}
+            onFinish={(seconds) => {
+              const result = createResult(seconds, Date.now());
+              saveResult(screen.timer.id, result);
+              setScreen({ name: "attemptDone", timerId: screen.timer.id, resultId: result.id });
+            }}
+          />
+        )}
+
+        {screen.name === "attemptDone" && attempted?.challenge && (
+          <AttemptDone
+            timer={attempted}
+            entries={history(resultsOf(attempted), attempted.challenge.goal)}
+            resultId={screen.resultId}
+            onRestart={() => start(attempted)}
+            onHistory={() => showChallenge(attempted.id)}
+            onDiscard={() => {
+              removeResult(attempted.id, screen.resultId);
+              showChallenge(attempted.id);
+            }}
           />
         )}
 
@@ -197,5 +268,32 @@ export function App() {
         <UpdatePrompt />
       </MessagesContext.Provider>
     </IonApp>
+  );
+}
+
+interface AttemptDoneProps {
+  timer: Timer;
+  /** The history of the challenge, which holds the result just saved. */
+  entries: HistoryEntry[];
+  resultId: string;
+  onRestart: () => void;
+  onHistory: () => void;
+  onDiscard: () => void;
+}
+
+/** Finds the result of the attempt in the history and shows how it compares. */
+function AttemptDone({ timer, entries, resultId, ...actions }: AttemptDoneProps) {
+  const entry = entries.find((candidate) => candidate.result.id === resultId);
+  const best = entries.find((candidate) => candidate.isBest);
+  if (!entry || !best) return null;
+
+  return (
+    <ChallengeDoneScreen
+      timer={timer}
+      entry={entry}
+      best={best.result.seconds}
+      attempts={entries.length}
+      {...actions}
+    />
   );
 }

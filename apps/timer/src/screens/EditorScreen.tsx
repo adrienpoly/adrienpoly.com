@@ -5,11 +5,13 @@ import { SequenceBar } from "../components/SequenceBar";
 import { useMessages } from "../i18n/useMessages";
 import {
   buildPhases,
+  canStart,
   createStep,
   formatDuration,
   PHASE_COLORS,
   TIMER_COLORS,
   totalSeconds,
+  type ChallengeGoal,
   type Step,
   type Timer,
   type TimerOptions,
@@ -50,6 +52,8 @@ type Target =
   | { type: "count"; key: "rounds" | "cycles" }
   | { type: "step"; id: string };
 
+const GOALS: ChallengeGoal[] = ["shortest", "longest"];
+
 /** The switches of the "Options" section, in the order they are shown. */
 const OPTIONS: Array<keyof TimerOptions> = ["countdown", "voice", "vibration", "keepAwake"];
 
@@ -71,7 +75,9 @@ function Editor({ initial, onCancel, onSave, onSaveAndStart, onDelete }: EditorP
     patch({ steps: timer.steps.map((step) => (step.id === id ? { ...step, ...changes } : step)) });
 
   const phases = buildPhases(timer, t.phases);
-  const canStart = phases.length > 0;
+  // A challenge has no steps, rounds or cycles: only a goal and a preparation.
+  const goal = timer.challenge?.goal;
+  const startable = canStart(timer, phases);
   // An empty name falls back to the one the timer had when the editor opened.
   const named = (): Timer => ({ ...timer, name: timer.name.trim() || initial.name });
 
@@ -126,9 +132,19 @@ function Editor({ initial, onCancel, onSave, onSaveAndStart, onDelete }: EditorP
 
   const roundContents = timer.steps.map((step) => step.name.toLowerCase()).join(" + ");
 
+  const prepareRow = (
+    <Row
+      name={t.phases.prepare}
+      hint={t.editor.prepareHint}
+      value={formatDuration(timer.prepareSeconds)}
+      dot={PHASE_COLORS.prepare}
+      onClick={() => edit({ type: "seconds", key: "prepareSeconds" })}
+    />
+  );
+
   function confirmDelete() {
     void presentAlert({
-      header: t.editor.confirmDelete(initial.name),
+      header: goal ? t.challenge.confirmDelete(initial.name) : t.editor.confirmDelete(initial.name),
       buttons: [
         { text: t.common.cancel, role: "cancel" },
         { text: t.common.delete, role: "destructive", handler: () => onDelete?.(initial) },
@@ -151,7 +167,7 @@ function Editor({ initial, onCancel, onSave, onSaveAndStart, onDelete }: EditorP
 
           <div className="editor-identity">
             <label className="display" htmlFor="timer-name">
-              {t.editor.name}
+              {goal ? t.editor.challengeName : t.editor.name}
             </label>
             <input
               id="timer-name"
@@ -175,65 +191,81 @@ function Editor({ initial, onCancel, onSave, onSaveAndStart, onDelete }: EditorP
             </div>
           </div>
 
-          <h2 className="editor-section display">{t.editor.intervals}</h2>
-          <div className="editor-group">
-            <Row
-              name={t.phases.prepare}
-              hint={t.editor.prepareHint}
-              value={formatDuration(timer.prepareSeconds)}
-              dot={PHASE_COLORS.prepare}
-              onClick={() => edit({ type: "seconds", key: "prepareSeconds" })}
-            />
-            <IonReorderGroup
-              disabled={false}
-              onIonReorderEnd={(event) => patch({ steps: event.detail.complete(timer.steps) })}
-            >
-              {timer.steps.map((step) => (
+          {goal ? (
+            <>
+              <h2 className="editor-section display">{t.editor.challengeSection}</h2>
+              <div className="editor-goal" role="radiogroup" aria-label={t.challenge.goal}>
+                {GOALS.map((option) => (
+                  <button
+                    key={option}
+                    role="radio"
+                    aria-checked={option === goal}
+                    onClick={() => patch({ challenge: { goal: option } })}
+                  >
+                    {t.challenge.goals[option].label}
+                  </button>
+                ))}
+              </div>
+              <p className="editor-note is-goal">{t.challenge.goals[goal].hint}</p>
+              <div className="editor-group">{prepareRow}</div>
+            </>
+          ) : (
+            <>
+              <h2 className="editor-section display">{t.editor.intervals}</h2>
+              <div className="editor-group">
+                {prepareRow}
+                <IonReorderGroup
+                  disabled={false}
+                  onIonReorderEnd={(event) => patch({ steps: event.detail.complete(timer.steps) })}
+                >
+                  {timer.steps.map((step) => (
+                    <Row
+                      key={step.id}
+                      name={step.name}
+                      hint={step.kind === "work" ? t.editor.workHint : t.editor.restHint}
+                      value={formatDuration(step.seconds)}
+                      dot={PHASE_COLORS[step.kind]}
+                      reorderable
+                      onClick={() => edit({ type: "step", id: step.id })}
+                    />
+                  ))}
+                </IonReorderGroup>
                 <Row
-                  key={step.id}
-                  name={step.name}
-                  hint={step.kind === "work" ? t.editor.workHint : t.editor.restHint}
-                  value={formatDuration(step.seconds)}
-                  dot={PHASE_COLORS[step.kind]}
-                  reorderable
-                  onClick={() => edit({ type: "step", id: step.id })}
+                  name={t.editor.rounds}
+                  hint={t.editor.roundContents(roundContents)}
+                  value={`×${timer.rounds}`}
+                  onClick={() => edit({ type: "count", key: "rounds" })}
                 />
-              ))}
-            </IonReorderGroup>
-            <Row
-              name={t.editor.rounds}
-              hint={t.editor.roundContents(roundContents)}
-              value={`×${timer.rounds}`}
-              onClick={() => edit({ type: "count", key: "rounds" })}
-            />
-            <Row
-              name={t.editor.cycles}
-              hint={t.editor.cycleContents(timer.rounds)}
-              value={`×${timer.cycles}`}
-              onClick={() => edit({ type: "count", key: "cycles" })}
-            />
-            <Row
-              name={t.phases.cycleRest}
-              hint={t.editor.cycleRestHint}
-              value={formatDuration(timer.cycleRestSeconds)}
-              dot={PHASE_COLORS.recovery}
-              onClick={() => edit({ type: "seconds", key: "cycleRestSeconds" })}
-            />
-            <Row
-              name={t.phases.recovery}
-              hint={t.editor.recoveryHint}
-              value={formatDuration(timer.recoverySeconds)}
-              dot={PHASE_COLORS.recovery}
-              onClick={() => edit({ type: "seconds", key: "recoverySeconds" })}
-            />
-          </div>
+                <Row
+                  name={t.editor.cycles}
+                  hint={t.editor.cycleContents(timer.rounds)}
+                  value={`×${timer.cycles}`}
+                  onClick={() => edit({ type: "count", key: "cycles" })}
+                />
+                <Row
+                  name={t.phases.cycleRest}
+                  hint={t.editor.cycleRestHint}
+                  value={formatDuration(timer.cycleRestSeconds)}
+                  dot={PHASE_COLORS.recovery}
+                  onClick={() => edit({ type: "seconds", key: "cycleRestSeconds" })}
+                />
+                <Row
+                  name={t.phases.recovery}
+                  hint={t.editor.recoveryHint}
+                  value={formatDuration(timer.recoverySeconds)}
+                  dot={PHASE_COLORS.recovery}
+                  onClick={() => edit({ type: "seconds", key: "recoverySeconds" })}
+                />
+              </div>
 
-          <div className="editor-add">
-            <button onClick={addStep}>
-              <PlusIcon size={18} weight={2.6} />
-              {t.editor.addStep} <span>{t.editor.addStepExample}</span>
-            </button>
-          </div>
+              <div className="editor-add">
+                <button onClick={addStep}>
+                  <PlusIcon size={18} weight={2.6} />
+                  {t.editor.addStep} <span>{t.editor.addStepExample}</span>
+                </button>
+              </div>
+            </>
+          )}
 
           <h2 className="editor-section display">{t.editor.optionsTitle}</h2>
           <div className="editor-group">
@@ -241,7 +273,9 @@ function Editor({ initial, onCancel, onSave, onSaveAndStart, onDelete }: EditorP
               <label key={option} className="editor-option">
                 <span className="editor-row-text">
                   <span className="editor-row-name">{t.editor.options[option].label}</span>
-                  <span className="editor-row-hint">{t.editor.options[option].hint}</span>
+                  <span className="editor-row-hint">
+                    {goal && option === "voice" ? t.challenge.voiceHint : t.editor.options[option].hint}
+                  </span>
                 </span>
                 <input
                   className="switch"
@@ -258,24 +292,29 @@ function Editor({ initial, onCancel, onSave, onSaveAndStart, onDelete }: EditorP
 
           {onDelete && (
             <button className="text-button editor-delete" onClick={confirmDelete}>
-              {t.editor.deleteTimer}
+              {goal ? t.editor.deleteChallenge : t.editor.deleteTimer}
             </button>
           )}
         </div>
       </IonContent>
 
       <IonFooter className="editor-footer ion-no-border">
-        <div className="editor-total">
-          <span>
-            <span className="editor-total-label">{t.editor.total}</span>
-            <span className="editor-total-detail">
-              {t.counts.rounds(timer.rounds * timer.cycles)} · {t.counts.cycles(timer.cycles)}
-            </span>
-          </span>
-          <span className="editor-total-value display">{formatDuration(totalSeconds(phases))}</span>
-        </div>
-        <SequenceBar className="editor-total-bar" phases={phases} />
-        <button className="cta has-glow" disabled={!canStart} onClick={() => onSaveAndStart(named())}>
+        {/* A challenge has no total: it lasts as long as the effort does. */}
+        {!goal && (
+          <>
+            <div className="editor-total">
+              <span>
+                <span className="editor-total-label">{t.editor.total}</span>
+                <span className="editor-total-detail">
+                  {t.counts.rounds(timer.rounds * timer.cycles)} · {t.counts.cycles(timer.cycles)}
+                </span>
+              </span>
+              <span className="editor-total-value display">{formatDuration(totalSeconds(phases))}</span>
+            </div>
+            <SequenceBar className="editor-total-bar" phases={phases} />
+          </>
+        )}
+        <button className="cta has-glow" disabled={!startable} onClick={() => onSaveAndStart(named())}>
           <PlayIcon size={18} />
           {t.editor.saveAndStart}
         </button>

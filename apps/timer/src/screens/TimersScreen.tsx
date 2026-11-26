@@ -9,15 +9,27 @@ import {
   useIonAlert,
 } from "@ionic/react";
 import { PlayIcon, PlusIcon, SettingsIcon, TrashIcon } from "../components/icons";
+import { Sparkline } from "../components/ResultsChart";
 import { SequenceBar } from "../components/SequenceBar";
 import { useMessages } from "../i18n/useMessages";
-import { buildPhases, formatDuration, summarize, totalSeconds, type Timer } from "../model/timer";
+import { bestResult, oldestFirst, type ResultsByTimer } from "../model/challenge";
+import {
+  buildPhases,
+  canStart,
+  formatDuration,
+  summarize,
+  totalSeconds,
+  type Timer,
+} from "../model/timer";
 import "./TimersScreen.css";
 
 interface Props {
   timers: Timer[];
+  /** The results of the challenges, by timer id. */
+  results: ResultsByTimer;
   onNew: () => void;
-  onEdit: (timer: Timer) => void;
+  /** A tap on the name: the editor for a timer, its page for a challenge. */
+  onOpen: (timer: Timer) => void;
   onStart: (timer: Timer) => void;
   onDelete: (timer: Timer) => void;
   onSettings: () => void;
@@ -25,14 +37,19 @@ interface Props {
   notice?: ReactNode;
 }
 
+/** Shown in place of the best time of a challenge that has no result yet. */
+const NO_RESULT = "–:––";
+
 /**
  * Screen 1: the saved timers. Tap a name to edit, the round button to start,
- * slide a card to the left to delete it.
+ * slide a card to the left to delete it. A challenge shows its best result
+ * where a timer shows its length, and its latest results as a curve.
  */
 export function TimersScreen({
   timers,
+  results,
   onNew,
-  onEdit,
+  onOpen,
   onStart,
   onDelete,
   onSettings,
@@ -44,7 +61,9 @@ export function TimersScreen({
   /** `sliding` is the card that was slid open, to close it again if the user cancels. */
   function confirmDelete(timer: Timer, sliding: HTMLIonItemSlidingElement | null) {
     void presentAlert({
-      header: t.timers.confirmDelete(timer.name),
+      header: timer.challenge
+        ? t.challenge.confirmDelete(timer.name)
+        : t.timers.confirmDelete(timer.name),
       buttons: [
         { text: t.common.cancel, role: "cancel" },
         { text: t.common.delete, role: "destructive", handler: () => onDelete(timer) },
@@ -75,6 +94,9 @@ export function TimersScreen({
           <ul className="timers-list">
             {timers.map((timer) => {
               const phases = buildPhases(timer, t.phases);
+              const goal = timer.challenge?.goal;
+              const attempts = oldestFirst(results[timer.id] ?? []);
+              const best = goal && bestResult(attempts, goal);
               return (
                 <li
                   key={timer.id}
@@ -85,25 +107,35 @@ export function TimersScreen({
                     <IonItem lines="none">
                       <div className="timer-card-body">
                         <div className="timer-card-row">
-                          <button className="timer-card-main" onClick={() => onEdit(timer)}>
+                          <button className="timer-card-main" onClick={() => onOpen(timer)}>
                             <span className="timer-card-name">{timer.name}</span>
                             <span className="timer-card-summary">
-                              {summarize(timer, t.counts.cycles)}
+                              {goal
+                                ? t.challenge.summary(goal, attempts.length)
+                                : summarize(timer, t.counts.cycles)}
                             </span>
                           </button>
                           <span className="timer-card-total display">
-                            {formatDuration(totalSeconds(phases))}
+                            {goal
+                              ? best
+                                ? formatDuration(best.seconds)
+                                : NO_RESULT
+                              : formatDuration(totalSeconds(phases))}
                           </span>
                           <button
                             className="timer-card-action"
                             aria-label={t.timers.start(timer.name)}
-                            disabled={phases.length === 0}
+                            disabled={!canStart(timer, phases)}
                             onClick={() => onStart(timer)}
                           >
                             <PlayIcon />
                           </button>
                         </div>
-                        <SequenceBar phases={phases} color={timer.color} />
+                        {goal ? (
+                          attempts.length > 1 && <Sparkline results={attempts} />
+                        ) : (
+                          <SequenceBar phases={phases} color={timer.color} />
+                        )}
                       </div>
                     </IonItem>
                     <IonItemOptions side="end">

@@ -11,7 +11,7 @@ interface Props {
 }
 
 /** "Tuesday, Nov 24, 07:12 AM" or "mardi 24 nov., 07:12", depending on the locale. */
-function formatFinishedAt(timestamp: number, locale: string): string {
+export function formatFinishedAt(timestamp: number, locale: string): string {
   const date = new Date(timestamp);
   const day = date.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "short" });
   const time = date.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
@@ -57,7 +57,7 @@ export function DoneScreen({ result, onRestart, onBack }: Props) {
         </p>
       </div>
 
-      <div className="done-stats">
+      <div className="stats">
         {stats.map((stat) => (
           <div key={stat.label}>
             <span className={stat.highlight ? "display is-highlight" : "display"}>{stat.value}</span>

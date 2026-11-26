@@ -1,4 +1,11 @@
-import type { DefaultNames, PhaseNames, TemplateId, TimerColorId, TimerOptions } from "../model/timer";
+import type {
+  ChallengeGoal,
+  DefaultNames,
+  PhaseNames,
+  TemplateId,
+  TimerColorId,
+  TimerOptions,
+} from "../model/timer";
 
 // English is the reference: its shape is the `Messages` type that every other
 // language must match (see fr.ts). Texts with a variable part are functions.
@@ -14,6 +21,7 @@ const names: DefaultNames = {
   rounds: "Rounds",
   lapTimer: "Lap timer",
   newTimer: "New timer",
+  challenge: "Challenge",
   classicTabata: "Classic Tabata",
   morningCore: "Morning core",
   boxing: "Boxing 3 rounds",
@@ -38,6 +46,7 @@ const templates: Record<TemplateId, { name: string; description: string }> = {
   tabata: { name: "Tabata", description: "Work / rest × rounds × cycles" },
   rounds: { name: "Rounds", description: "Work + rest, repeated N times" },
   laps: { name: "Lap timer", description: "A beep on every lap" },
+  challenge: { name: "Challenge", description: "A stopwatch that keeps your results" },
   blank: { name: "Blank", description: "Build your own steps" },
 };
 
@@ -110,6 +119,9 @@ export const en = {
     saveAndStart: "Save and start",
     deleteTimer: "Delete timer",
     confirmDelete: (name: string) => `Delete “${name}”?`,
+    challengeName: "Challenge name",
+    challengeSection: "Challenge",
+    deleteChallenge: "Delete challenge",
   },
 
   duration: {
@@ -153,6 +165,65 @@ export const en = {
     other: "Prepare / cool down",
     restart: "Go again",
     back: "Back to timers",
+  },
+
+  challenge: {
+    goal: "Goal",
+    goals: {
+      shortest: {
+        label: "Fastest",
+        hint: "The shortest time is the best. For example: 20 push-ups.",
+      },
+      longest: {
+        label: "Longest",
+        hint: "The longest time is the best. For example: hanging from a bar.",
+      },
+    } satisfies Record<ChallengeGoal, { label: string; hint: string }>,
+    /** Under the name, on the card of a challenge. */
+    summary: (goal: ChallengeGoal, results: number) =>
+      results === 0
+        ? `Challenge · ${goal === "shortest" ? "fastest" : "longest"} time`
+        : `Best of ${plural(results, "attempt")}`,
+    confirmDelete: (name: string) => `Delete “${name}” and its results?`,
+
+    /** The page of a challenge. */
+    back: "Back to timers",
+    edit: "Edit the challenge",
+    best: "Best",
+    last: "Last",
+    attempts: "Attempts",
+    progress: "Progress",
+    chartLabel: (results: number) => `Progress over ${plural(results, "result")}`,
+    history: "History",
+    add: "Add a result",
+    empty: "No result yet. Start the challenge, or add a result by hand with the + button.",
+    start: "Start",
+
+    /** An attempt. */
+    go: "Go!",
+    finish: "Done",
+    bestSoFar: (time: string) => `best ${time}`,
+    /** Spoken. */
+    sayGo: "Go",
+    sayRecord: "New record",
+    /** Under the "Voice announcements" option, in place of the phases of a timer. */
+    voiceHint: "“Prepare”, “Go”, “New record”",
+
+    /** The end of an attempt. */
+    recordTitle: ["New", "record!"],
+    time: "Time",
+    first: "First result saved.",
+    better: (gap: string, best: string) => `${gap} better than your previous best (${best}).`,
+    equal: (best: string) => `Same as your best (${best}).`,
+    worse: (gap: string, best: string) => `${gap} off your best (${best}).`,
+    seeHistory: "See the history",
+    discard: "Don’t keep this result",
+
+    /** The sheet that adds or corrects a result. */
+    newResult: "New result",
+    correctResult: "Correct the result",
+    date: "Date",
+    deleteResult: "Delete the result",
   },
 
   settings: {

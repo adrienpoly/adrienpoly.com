@@ -26,7 +26,9 @@ export function TemplatesSheet({ isOpen, onClose, onPick }: Props) {
       initialBreakpoint={1}
       breakpoints={[0, 1]}
     >
-      <div className="sheet-body templates">
+      {/* The second class tells Ionic that this element scrolls: the sheet's drag
+          gesture then only starts when the list is at its top. */}
+      <div className="sheet-body templates ion-content-scroll-host">
         <div>
           <button className="text-button" onClick={onClose}>
             {t.common.cancel}
@@ -51,11 +53,14 @@ export function TemplatesSheet({ isOpen, onClose, onPick }: Props) {
             <span className="template-text">
               <span className="template-name">{t.templates.list[template.id].name}</span>
               <span className="template-description">{t.templates.list[template.id].description}</span>
-              <SequenceBar
-                className="template-bar"
-                phases={buildPhases(samples[index], t.phases)}
-                color={samples[index].color}
-              />
+              {/* A challenge has no sequence to draw: its effort is as long as it takes. */}
+              {!samples[index].challenge && (
+                <SequenceBar
+                  className="template-bar"
+                  phases={buildPhases(samples[index], t.phases)}
+                  color={samples[index].color}
+                />
+              )}
             </span>
             <ChevronIcon />
           </button>

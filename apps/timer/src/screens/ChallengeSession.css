@@ -1,0 +1,44 @@
+/* A long name is cut short before the time to beat is. */
+.challenge-title {
+  display: flex;
+  justify-content: center;
+  white-space: pre;
+}
+
+.challenge-title-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/*
+ * The one control of an attempt: a button as large as the lower third of the
+ * screen, because it is tapped out of breath, or just after letting go of a bar.
+ * It builds on the session screen (SessionScreen.css): sizes are in container units.
+ */
+.challenge-finish {
+  /* The clock above has an automatic top margin too: it sits in the middle of the free space. */
+  margin: auto 12px 0;
+  height: 34cqh;
+  border: none;
+  border-radius: 28px;
+  background: var(--ink);
+  font-size: min(20cqw, 16cqh);
+  letter-spacing: 1px;
+  color: var(--phase);
+  transition: color 0.25s;
+}
+
+/* During the preparation there is nothing to stop yet. */
+.challenge-finish:disabled {
+  opacity: 0.3;
+}
+
+@container session (orientation: landscape) {
+  .challenge-finish {
+    flex: 1;
+    height: auto;
+    margin: 0;
+    font-size: 15cqh;
+  }
+}

@@ -1,6 +1,7 @@
 // A timer is one definition: prepare, then cycles × rounds × steps, with a rest
 // between cycles and a recovery at the end. Tabata, rounds and lap timers are
-// just different values of the same shape.
+// just different values of the same shape. A challenge is the one exception:
+// a timer without steps, whose effort is measured (see challenge.ts).
 //
 // This file holds no text. Every name it needs is passed in, taken from the
 // messages of the current language (src/i18n).
@@ -42,6 +43,7 @@ export interface DefaultNames {
   rounds: string;
   lapTimer: string;
   newTimer: string;
+  challenge: string;
   classicTabata: string;
   morningCore: string;
   boxing: string;
@@ -67,6 +69,9 @@ export interface TimerOptions {
   keepAwake: boolean;
 }
 
+/** Which result of a challenge is the best: the shortest time or the longest. */
+export type ChallengeGoal = "shortest" | "longest";
+
 export interface Timer {
   id: string;
   name: string;
@@ -80,6 +85,11 @@ export interface Timer {
   /** Recovery after the last cycle. */
   recoverySeconds: number;
   options: TimerOptions;
+  /**
+   * Set for a challenge: after the preparation, a stopwatch runs until the user
+   * stops it, and the time is kept as a result. A challenge has no steps.
+   */
+  challenge?: { goal: ChallengeGoal };
 }
 
 /** One stretch of time in a session. `round` and `cycle` start at 1. */
@@ -110,6 +120,11 @@ export function buildPhases(timer: Timer, names: PhaseNames): Phase[] {
   add("recovery", names.recovery, timer.recoverySeconds, timer.rounds, timer.cycles);
 
   return phases;
+}
+
+/** A challenge can always start; a timer needs at least one phase. */
+export function canStart(timer: Timer, phases: Phase[]): boolean {
+  return timer.challenge !== undefined || phases.length > 0;
 }
 
 export function totalSeconds(phases: Phase[]): number {
@@ -149,6 +164,7 @@ interface TimerValues {
   cycles?: number;
   cycleRest?: number;
   recovery?: number;
+  challenge?: ChallengeGoal;
 }
 
 function createTimer(values: TimerValues): Timer {
@@ -168,6 +184,7 @@ function createTimer(values: TimerValues): Timer {
     cycleRestSeconds: values.cycleRest ?? 0,
     recoverySeconds: values.recovery ?? 0,
     options: { ...DEFAULT_OPTIONS },
+    ...(values.challenge && { challenge: { goal: values.challenge } }),
   };
 }
 
@@ -175,7 +192,7 @@ export function createStep(names: DefaultNames): Step {
   return { id: crypto.randomUUID(), name: names.newStep, kind: "work", seconds: 30 };
 }
 
-export type TemplateId = "tabata" | "rounds" | "laps" | "blank";
+export type TemplateId = "tabata" | "rounds" | "laps" | "challenge" | "blank";
 
 export interface Template {
   id: TemplateId;
@@ -226,6 +243,19 @@ export const TEMPLATES: Template[] = [
         prepare: 10,
         steps: [[names.lap, "work", 60]],
         rounds: 6,
+      }),
+  },
+  {
+    id: "challenge",
+    badge: "★",
+    create: (names) =>
+      createTimer({
+        name: names.challenge,
+        color: "#9B5CFF",
+        prepare: 10,
+        steps: [],
+        rounds: 1,
+        challenge: "shortest",
       }),
   },
   {
