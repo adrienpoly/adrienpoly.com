@@ -21,12 +21,17 @@ export const fr: Messages = {
     morningCore: "Gainage matin",
     boxing: "Boxe 3 rounds",
     trackIntervals: "Fractionné piste",
+    circuit: "Circuit",
+    intervals: "Intervalles",
+    pushUps: "10 pompes",
+    plank: "Planche",
   },
 
   phases: {
     prepare: "Préparer",
     cycleRest: "Repos entre cycles",
     recovery: "Récupération",
+    transition: "Transition",
   },
 
   colors: {
@@ -66,6 +71,7 @@ export const fr: Messages = {
       rounds: { name: "Rounds", description: "Exercice + repos, répété N fois" },
       laps: { name: "Chronomètre à tours", description: "Un bip à chaque tour de temps" },
       challenge: { name: "Défi", description: "Un chronomètre qui garde tes résultats" },
+      circuit: { name: "Circuit", description: "Des intervalles et des efforts chronométrés, à la suite" },
       blank: { name: "Vierge", description: "Compose tes propres étapes" },
     },
   },
@@ -194,6 +200,69 @@ export const fr: Messages = {
     correctResult: "Corriger le résultat",
     date: "Date",
     deleteResult: "Supprimer le résultat",
+  },
+
+  circuit: {
+    name: "Nom du circuit",
+    blocks: "Blocs",
+    reorderHint: "Glisse la poignée pour réordonner",
+    addBlock: "Ajouter un bloc",
+    betweenBlocks: "Entre les blocs",
+    transitionHint: "Le temps de se mettre en place pour le bloc suivant",
+    timedTotal: "Durée minutée",
+    plusEfforts: (count) => `+ ${plural(count, "effort")} chronométré${count > 1 ? "s" : ""}`,
+    deleteCircuit: "Supprimer le circuit",
+    confirmDelete: (name) => `Supprimer « ${name} » et ses records ?`,
+    badge: "Circuit",
+    efforts: (count) => `+ ${plural(count, "effort")}`,
+
+    types: {
+      intervals: "Intervalles",
+      rest: "Repos",
+    },
+    noLimit: "sans limite",
+    limitOf: (time) => `limite ${time}`,
+    record: "record",
+
+    add: {
+      title: "Ajouter un bloc",
+      intervals: { label: "Intervalles", hint: "Tabata, rounds, tours : un temps fixe" },
+      shortest: { label: "Le plus vite", hint: "Le chrono monte jusqu’à « Fini ». Ex. 10 pompes" },
+      longest: { label: "Le plus longtemps", hint: "Le chrono monte jusqu’à « Lâché ». Ex. planche" },
+      rest: { label: "Repos", hint: "Une pause d’une durée fixe" },
+      copy: "Copier un de mes minuteurs",
+      copyNote: "Le bloc est une copie : modifier le minuteur d’origine ne change pas le circuit.",
+    },
+
+    block: {
+      name: "Nom du bloc",
+      limit: "Temps limite",
+      limitHint: "L’effort s’arrête tout seul après ce temps. 0:00 : sans limite",
+      duration: "Durée",
+      durationHint: "Une pause avant le bloc suivant",
+      delete: "Supprimer le bloc",
+      confirmDelete: (name) => `Supprimer le bloc « ${name} » et ses records ?`,
+    },
+
+    session: {
+      block: "Bloc",
+      record: "Record",
+      limit: "Limite",
+      finish: { shortest: "Fini", longest: "Lâché" },
+      sayEffort: (name, goal) =>
+        goal === "shortest" ? `${name}. Le plus vite possible` : `${name}. Tiens le plus longtemps possible`,
+    },
+
+    done: {
+      title: ["Circuit", "bouclé !"],
+      records: (count) => (count > 1 ? "Records" : "Record"),
+      byBlock: "Bloc par bloc",
+      completed: "Terminé",
+      first: "Premier résultat",
+      newRecord: (difference) => `Record ! ${difference}`,
+      reachedLimit: "Limite atteinte",
+      skipped: "Passé",
+    },
   },
 
   settings: {

@@ -8,8 +8,10 @@ import {
   PreviousIcon,
   RotateIcon,
 } from "../components/icons";
+import { effortOutcomes, type EffortOutcome } from "../model/circuit";
 import {
   createSession,
+  finishEffort,
   isFinished,
   isPaused,
   pause,
@@ -20,28 +22,36 @@ import {
   view,
 } from "../model/session";
 import {
+  barSeconds,
   buildPhases,
   formatDuration,
   PHASE_COLORS,
+  type Block,
   type Phase,
   type PhaseKind,
   type Timer,
 } from "../model/timer";
 import { playSound, say, vibrate } from "../platform/cues";
 import { SOUNDS, type SoundChoice } from "../platform/sounds";
+import type { Messages } from "../i18n/en";
 import { useMessages } from "../i18n/useMessages";
 import { useWakeLock } from "../platform/useWakeLock";
 import "./SessionScreen.css";
+import "./ChallengeSession.css";
 
 export interface SessionResult {
   timer: Timer;
   finishedAt: number;
   /** Time (ms) really spent in each kind of phase. */
   spentMs: Record<PhaseKind, number>;
+  /** For a circuit: how each effort went. Empty for a timer. */
+  efforts: EffortOutcome[];
 }
 
 interface Props {
   timer: Timer;
+  /** For a circuit: the record of each effort, in seconds, by block id. */
+  records?: Record<string, number>;
   /** The variant to play for each sound. */
   sounds: SoundChoice;
   onStop: () => void;
@@ -50,8 +60,12 @@ interface Props {
 
 const TICK_MS = 100;
 
-/** Screens 5 and 5b: the running session, full screen in the color of the phase. */
-export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
+/**
+ * Screens 5 and 5b: the running session, full screen in the color of the phase.
+ * In a circuit, an effort shows a stopwatch that counts up and one large
+ * button that ends it, as an attempt at a challenge does.
+ */
+export function SessionScreen({ timer, records = {}, sounds, onStop, onFinish }: Props) {
   const t = useMessages();
   const phases = useMemo(() => buildPhases(timer, t.phases), [timer, t]);
   const [session, setSession] = useState(() => createSession(phases, Date.now()));
@@ -72,8 +86,11 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
     return () => clearInterval(interval);
   }, []);
 
-  const { phase, nextPhase, phaseRemainingSeconds, totalRemainingSeconds } = view(session, now);
+  const { phase, nextPhase, phaseElapsedSeconds, phaseRemainingSeconds, totalRemainingSeconds, effortsLeft } =
+    view(session, now);
   const paused = isPaused(session);
+  const blockOf = (candidate: Phase): Block | undefined =>
+    candidate.block === undefined ? undefined : timer.circuit?.blocks[candidate.block];
 
   // Cues at the start of each phase and at the end of the session. The refs
   // make sure each one plays once, whatever caused the render.
@@ -86,21 +103,35 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
       playSound(SOUNDS.finish[sounds.finish]);
       if (options.voice) say(t.session.sayFinished, t.speechLang);
       if (options.vibration) vibrate();
-      onFinish({ timer, finishedAt: Date.now(), spentMs: session.spentMs });
+      onFinish({
+        timer,
+        finishedAt: Date.now(),
+        spentMs: session.spentMs,
+        efforts: effortOutcomes(timer, session.phases, session.efforts),
+      });
       return;
     }
 
     const current = session.phases[session.index];
     playSound(SOUNDS.phaseStart[sounds.phaseStart]);
-    if (options.voice) {
-      say(isLastRound(current, timer) ? t.session.sayLastRound(current.name) : current.name, t.speechLang);
-    }
+    if (options.voice) say(announcement(current), t.speechLang);
     if (options.vibration) vibrate();
   }, [session, timer, options, sounds, onFinish, t]);
 
+  /** What the voice says when a phase starts. */
+  function announcement(current: Phase): string {
+    const block = blockOf(current);
+    if (current.kind === "effort" && block?.type === "effort") {
+      return t.circuit.session.sayEffort(current.name, block.goal);
+    }
+    const intervals = block?.type === "intervals" ? block : timer;
+    return isLastRound(current, intervals) ? t.session.sayLastRound(current.name) : current.name;
+  }
+
   const beepedSecond = useRef("");
   useEffect(() => {
-    if (!options.countdown || paused || phaseRemainingSeconds < 1 || phaseRemainingSeconds > 3) return;
+    if (!options.countdown || paused || phaseRemainingSeconds === null) return;
+    if (phaseRemainingSeconds < 1 || phaseRemainingSeconds > 3) return;
     const second = `${session.index}:${phaseRemainingSeconds}`;
     if (beepedSecond.current === second) return;
     beepedSecond.current = second;
@@ -119,8 +150,13 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
 
   if (!phase) return null;
 
-  const time = formatDuration(phaseRemainingSeconds);
+  const block = blockOf(phase);
+  const effort = phase.kind === "effort" && block?.type === "effort" ? block : undefined;
+  // An effort counts up: its length is what is measured.
+  const time = formatDuration(effort ? phaseElapsedSeconds : (phaseRemainingSeconds ?? 0));
   const color = PHASE_COLORS[phase.kind];
+  const remaining = t.session.remaining(formatDuration(totalRemainingSeconds));
+  const counters = countersOf(timer, phase, t);
 
   return (
     <div className="session-viewport" style={{ "--phase": color } as CSSProperties}>
@@ -130,7 +166,7 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
             <span
               key={index}
               className={index <= session.index ? "is-reached" : undefined}
-              style={{ flexGrow: segment.seconds }}
+              style={{ flexGrow: barSeconds(segment) }}
             />
           ))}
         </div>
@@ -142,7 +178,8 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
                 <CloseIcon />
               </button>
               <span className="session-title">
-                {timer.name} · <span>{t.session.remaining(formatDuration(totalRemainingSeconds))}</span>
+                {timer.name} ·{" "}
+                <span>{effortsLeft > 0 ? `${remaining} ${t.circuit.efforts(effortsLeft)}` : remaining}</span>
               </span>
               <button
                 className="session-round-button session-rotate"
@@ -154,6 +191,7 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
             </div>
 
             <div className="session-clock">
+              {effort && <span className="session-goal">{t.challenge.goals[effort.goal].label}</span>}
               <span
                 className="session-phase display"
                 style={{ "--characters": phase.name.length } as CSSProperties}
@@ -172,8 +210,18 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
 
           <div className="session-secondary">
             <div className="session-counters">
-              <Counter label={t.session.round} value={phase.round} of={timer.rounds} />
-              <Counter label={t.session.cycle} value={phase.cycle} of={timer.cycles} />
+              {effort ? (
+                <>
+                  {records[effort.id] !== undefined && (
+                    <Counter label={t.circuit.session.record} value={formatDuration(records[effort.id])} />
+                  )}
+                  {effort.limitSeconds > 0 && (
+                    <Counter label={t.circuit.session.limit} value={formatDuration(effort.limitSeconds)} />
+                  )}
+                </>
+              ) : (
+                counters.map((counter) => <Counter key={counter.label} {...counter} />)
+              )}
             </div>
 
             <div className="session-next">
@@ -183,7 +231,9 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
                   <span className="session-next-label">
                     {t.session.next} <strong>{nextPhase.name}</strong>
                   </span>
-                  <span className="session-next-time display">{formatDuration(nextPhase.seconds)}</span>
+                  {nextPhase.kind !== "effort" && (
+                    <span className="session-next-time display">{formatDuration(nextPhase.seconds)}</span>
+                  )}
                 </>
               ) : (
                 <span className="session-next-label">
@@ -192,31 +242,40 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
               )}
             </div>
 
-            <div className="session-controls">
+            {effort ? (
               <button
-                className="session-skip"
-                aria-label={t.session.previousPhase}
-                onClick={() => setSession((current) => skipBack(current, Date.now()))}
+                className="challenge-finish session-finish display"
+                onClick={() => setSession((current) => finishEffort(current, Date.now()))}
               >
-                <PreviousIcon />
+                {t.circuit.session.finish[effort.goal]}
               </button>
-              <button
-                className="session-pause"
-                aria-label={paused ? t.session.resume : t.session.pause}
-                onClick={() =>
-                  setSession((current) => (paused ? resume(current, Date.now()) : pause(current, Date.now())))
-                }
-              >
-                {paused ? <PlayIcon size={34} /> : <PauseIcon />}
-              </button>
-              <button
-                className="session-skip"
-                aria-label={t.session.nextPhase}
-                onClick={() => setSession((current) => skipForward(current, Date.now()))}
-              >
-                <NextIcon />
-              </button>
-            </div>
+            ) : (
+              <div className="session-controls">
+                <button
+                  className="session-skip"
+                  aria-label={t.session.previousPhase}
+                  onClick={() => setSession((current) => skipBack(current, Date.now()))}
+                >
+                  <PreviousIcon />
+                </button>
+                <button
+                  className="session-pause"
+                  aria-label={paused ? t.session.resume : t.session.pause}
+                  onClick={() =>
+                    setSession((current) => (paused ? resume(current, Date.now()) : pause(current, Date.now())))
+                  }
+                >
+                  {paused ? <PlayIcon size={34} /> : <PauseIcon />}
+                </button>
+                <button
+                  className="session-skip"
+                  aria-label={t.session.nextPhase}
+                  onClick={() => setSession((current) => skipForward(current, Date.now()))}
+                >
+                  <NextIcon />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -224,24 +283,46 @@ export function SessionScreen({ timer, sounds, onStop, onFinish }: Props) {
   );
 }
 
-function Counter({ label, value, of }: { label: string; value: number; of: number }) {
+interface CounterProps {
+  label: string;
+  value: number | string;
+  /** The total, shown after the value: "3/5". */
+  of?: number;
+}
+
+function Counter({ label, value, of }: CounterProps) {
   return (
     <div className="session-counter">
       <span className="session-counter-value display">
         {value}
-        <span>/{of}</span>
+        {of !== undefined && <span>/{of}</span>}
       </span>
       <span className="session-counter-label">{label}</span>
     </div>
   );
 }
 
-/** True for effort phases of the last round of the last cycle, when there is more than one round. */
-function isLastRound(phase: Phase, timer: Timer): boolean {
+/** Round and cycle for a timer; in a circuit, the block, and the round inside an intervals block. */
+function countersOf(timer: Timer, current: Phase, t: Messages): CounterProps[] {
+  const round = (of: { rounds: number }) => ({ label: t.session.round, value: current.round, of: of.rounds });
+  if (!timer.circuit) {
+    return [round(timer), { label: t.session.cycle, value: current.cycle, of: timer.cycles }];
+  }
+  if (current.block === undefined) return [];
+
+  const { blocks } = timer.circuit;
+  const block = blocks[current.block];
+  const position = { label: t.circuit.session.block, value: current.block + 1, of: blocks.length };
+  // A transition belongs to the block it leads to, but it has no rounds.
+  return block?.type === "intervals" && current.kind !== "prepare" ? [position, round(block)] : [position];
+}
+
+/** True for work phases of the last round of the last cycle, when there is more than one round. */
+function isLastRound(phase: Phase, intervals: { rounds: number; cycles: number }): boolean {
   return (
     phase.kind === "work" &&
-    timer.rounds * timer.cycles > 1 &&
-    phase.round === timer.rounds &&
-    phase.cycle === timer.cycles
+    intervals.rounds * intervals.cycles > 1 &&
+    phase.round === intervals.rounds &&
+    phase.cycle === intervals.cycles
   );
 }

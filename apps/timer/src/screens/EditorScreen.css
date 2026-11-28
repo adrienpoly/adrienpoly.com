@@ -126,6 +126,19 @@
   border: 2px solid #ffffff;
 }
 
+/* The number of a block of a circuit, in the color of its kind. */
+.editor-row-dot.is-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--ink);
+}
+
 .editor-row-text {
   display: flex;
   flex: 1;
@@ -303,6 +316,12 @@
 .editor-total-detail {
   font-size: 13px;
   color: var(--muted);
+}
+
+/* "+ 2 timed efforts": they are not in the total. */
+.editor-total-detail.is-efforts {
+  font-weight: 700;
+  color: #b98cff;
 }
 
 .editor-total-value {

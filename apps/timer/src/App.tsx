@@ -3,6 +3,7 @@ import { IonApp, IonToast } from "@ionic/react";
 import { MESSAGES, resolveLanguage } from "./i18n/language";
 import { MessagesContext } from "./i18n/useMessages";
 import { bestResult, createResult, history, type HistoryEntry } from "./model/challenge";
+import { effortBlocks, removedEfforts } from "./model/circuit";
 import type { Timer } from "./model/timer";
 import { unlockCues } from "./platform/cues";
 import { useSilentModeHint } from "./platform/useSilentModeHint";
@@ -13,6 +14,7 @@ import { useInstall } from "./pwa/useInstall";
 import { ChallengeDoneScreen } from "./screens/ChallengeDoneScreen";
 import { ChallengeScreen } from "./screens/ChallengeScreen";
 import { ChallengeSession } from "./screens/ChallengeSession";
+import { CircuitDoneScreen } from "./screens/CircuitDoneScreen";
 import { DoneScreen } from "./screens/DoneScreen";
 import { EditorScreen } from "./screens/EditorScreen";
 import { SessionScreen, type SessionResult } from "./screens/SessionScreen";
@@ -31,6 +33,8 @@ type Screen =
   // `run` changes on every start, so restarting the same timer gives a fresh session.
   | { name: "session"; timer: Timer; run: number }
   | { name: "done"; result: SessionResult }
+  // The end of a circuit: the results of its efforts are already saved, by block id.
+  | { name: "circuitDone"; result: SessionResult; resultIds: Record<string, string> }
   // The end of an attempt at a challenge: the result is already saved.
   | { name: "attemptDone"; timerId: string; resultId: string };
 
@@ -40,7 +44,13 @@ export function App() {
   const language = resolveLanguage(setting ?? "auto", navigator.languages);
   const messages = MESSAGES[language];
   const { timers, save, remove } = useTimers(language);
-  const { results, save: saveResult, remove: removeResult, removeAll: removeResults } = useResults();
+  const {
+    results,
+    save: saveResult,
+    saveAll: saveResults,
+    remove: removeResult,
+    removeAll: removeResults,
+  } = useResults();
   const [screen, setScreen] = useState<Screen>({ name: "timers" });
   // The challenge whose page is open, between the list and a session: an
   // attempt started from the page comes back to it.
@@ -61,11 +71,18 @@ export function App() {
     setEditorOpen(true);
   }
 
-  /** A challenge goes with its results. */
+  /** A challenge goes with its results, a circuit with the results of its efforts. */
   function removeTimer(timer: Timer) {
     remove(timer.id);
     if (timer.challenge) removeResults(timer.id);
+    removeResults(...effortBlocks(timer).map((block) => block.id));
     if (timer.id === challengeId) setChallengeId(null);
+  }
+
+  /** The results of the efforts that a circuit no longer has go too. */
+  function saveTimer(timer: Timer) {
+    removeResults(...removedEfforts(timers?.find((candidate) => candidate.id === timer.id), timer));
+    save(timer);
   }
 
   function showChallenge(timerId: string) {
@@ -87,7 +104,22 @@ export function App() {
     silentModeHint.showOnce();
   }
 
-  const showResult = useCallback((result: SessionResult) => setScreen({ name: "done", result }), []);
+  /** The end of a session. The efforts of a circuit that count are kept as results. */
+  const showResult = useCallback(
+    (result: SessionResult) => {
+      if (!result.timer.circuit) {
+        setScreen({ name: "done", result });
+        return;
+      }
+      const saved = result.efforts.flatMap(({ block, seconds, counts }) =>
+        counts && seconds !== null ? [{ timerId: block.id, result: createResult(seconds, result.finishedAt) }] : [],
+      );
+      saveResults(saved);
+      const resultIds = Object.fromEntries(saved.map((entry) => [entry.timerId, entry.result.id]));
+      setScreen({ name: "circuitDone", result, resultIds });
+    },
+    [saveResults],
+  );
 
   useEffect(() => {
     document.documentElement.lang = messages.locale;
@@ -101,6 +133,14 @@ export function App() {
 
   const draftIsSaved = draft !== null && timers.some((timer) => timer.id === draft.id);
   const resultsOf = (timer: Timer) => results[timer.id] ?? [];
+  /** The record of each effort of a circuit, in seconds, by block id. */
+  const recordsOf = (timer: Timer) =>
+    Object.fromEntries(
+      effortBlocks(timer).flatMap((block) => {
+        const best = bestResult(results[block.id] ?? [], block.goal);
+        return best ? [[block.id, best.seconds]] : [];
+      }),
+    );
   const challenge = timers.find((timer) => timer.id === challengeId);
   const attempted =
     screen.name === "attemptDone" ? timers.find((timer) => timer.id === screen.timerId) : undefined;
@@ -184,13 +224,15 @@ export function App() {
         <EditorScreen
           isOpen={editorOpen}
           timer={draft}
+          timers={timers}
+          results={results}
           onCancel={() => setEditorOpen(false)}
           onSave={(timer) => {
-            save(timer);
+            saveTimer(timer);
             setEditorOpen(false);
           }}
           onSaveAndStart={(timer) => {
-            save(timer);
+            saveTimer(timer);
             setEditorOpen(false);
             start(timer);
           }}
@@ -212,6 +254,7 @@ export function App() {
           <SessionScreen
             key={screen.run}
             timer={screen.timer}
+            records={recordsOf(screen.timer)}
             sounds={sounds}
             onStop={() => setScreen({ name: "timers" })}
             onFinish={showResult}
@@ -245,6 +288,16 @@ export function App() {
               removeResult(attempted.id, screen.resultId);
               showChallenge(attempted.id);
             }}
+          />
+        )}
+
+        {screen.name === "circuitDone" && (
+          <CircuitDoneScreen
+            result={screen.result}
+            results={results}
+            resultIds={screen.resultIds}
+            onRestart={() => start(screen.result.timer)}
+            onBack={() => setScreen({ name: "timers" })}
           />
         )}
 

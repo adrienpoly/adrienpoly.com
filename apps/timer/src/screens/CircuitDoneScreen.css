@@ -1,0 +1,99 @@
+/* Builds on the end screen of a session (DoneScreen.css): one line per block. */
+
+/* The lines of the blocks take room: the heading is smaller, so the buttons stay on screen. */
+.circuit-done {
+  gap: 20px;
+  padding-top: calc(40px + env(safe-area-inset-top));
+}
+
+.circuit-done .done-check {
+  width: 56px;
+  height: 56px;
+}
+
+.circuit-done .done-heading h1 {
+  font-size: 60px;
+}
+
+.stats .is-record {
+  color: #b98cff;
+}
+
+.circuit-done-blocks {
+  gap: 0;
+}
+
+.circuit-done-blocks h2 {
+  margin-bottom: 6px;
+}
+
+.circuit-done-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.circuit-done-number {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  font-size: 16px;
+  color: var(--ink);
+}
+
+.circuit-done-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.circuit-done-name {
+  font-size: 15px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.circuit-done-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.circuit-done-result {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.circuit-done-result .display {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.circuit-done-status {
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.circuit-done-status.is-muted {
+  color: var(--muted);
+}
+
+.circuit-done-status.is-good {
+  color: var(--lime);
+}
+
+.circuit-done-status.is-bad {
+  color: #ff6fae;
+}

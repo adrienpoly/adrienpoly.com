@@ -16,6 +16,7 @@ import { bestResult, oldestFirst, type ResultsByTimer } from "../model/challenge
 import {
   buildPhases,
   canStart,
+  effortCount,
   formatDuration,
   summarize,
   totalSeconds,
@@ -43,7 +44,8 @@ const NO_RESULT = "–:––";
 /**
  * Screen 1: the saved timers. Tap a name to edit, the round button to start,
  * slide a card to the left to delete it. A challenge shows its best result
- * where a timer shows its length, and its latest results as a curve.
+ * where a timer shows its length, and its latest results as a curve. A
+ * circuit shows the length of its timed part and the number of its efforts.
  */
 export function TimersScreen({
   timers,
@@ -63,7 +65,9 @@ export function TimersScreen({
     void presentAlert({
       header: timer.challenge
         ? t.challenge.confirmDelete(timer.name)
-        : t.timers.confirmDelete(timer.name),
+        : timer.circuit
+          ? t.circuit.confirmDelete(timer.name)
+          : t.timers.confirmDelete(timer.name),
       buttons: [
         { text: t.common.cancel, role: "cancel" },
         { text: t.common.delete, role: "destructive", handler: () => onDelete(timer) },
@@ -97,6 +101,7 @@ export function TimersScreen({
               const goal = timer.challenge?.goal;
               const attempts = oldestFirst(results[timer.id] ?? []);
               const best = goal && bestResult(attempts, goal);
+              const efforts = effortCount(phases);
               return (
                 <li
                   key={timer.id}
@@ -108,7 +113,10 @@ export function TimersScreen({
                       <div className="timer-card-body">
                         <div className="timer-card-row">
                           <button className="timer-card-main" onClick={() => onOpen(timer)}>
-                            <span className="timer-card-name">{timer.name}</span>
+                            <span className="timer-card-name">
+                              {timer.name}
+                              {timer.circuit && <span className="timer-card-badge">{t.circuit.badge}</span>}
+                            </span>
                             <span className="timer-card-summary">
                               {goal
                                 ? t.challenge.summary(goal, attempts.length)
@@ -121,6 +129,7 @@ export function TimersScreen({
                                 ? formatDuration(best.seconds)
                                 : NO_RESULT
                               : formatDuration(totalSeconds(phases))}
+                            {efforts > 0 && <span className="timer-card-efforts">{t.circuit.efforts(efforts)}</span>}
                           </span>
                           <button
                             className="timer-card-action"

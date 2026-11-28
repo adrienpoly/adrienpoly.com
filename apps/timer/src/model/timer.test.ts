@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  blockFromTimer,
+  blockPhases,
   buildPhases,
   canStart,
+  createBlock,
   createStarterTimers,
+  duplicateBlock,
+  effortCount,
   formatDuration,
   summarize,
   TEMPLATES,
   totalSeconds,
+  type Block,
   type Timer,
 } from "./timer";
 import { en } from "../i18n/en";
@@ -100,5 +106,109 @@ describe("the challenge template", () => {
     const challenges = TEMPLATES.filter((template) => template.create(names).challenge);
 
     expect(challenges.map((template) => template.id)).toEqual(["challenge"]);
+  });
+});
+
+describe("circuits", () => {
+  const template = () => TEMPLATES.find((candidate) => candidate.id === "circuit")!.create(names);
+  const withBlocks = (blocks: Block[], transitionSeconds = 30): Timer => ({
+    ...template(),
+    prepareSeconds: 10,
+    recoverySeconds: 60,
+    circuit: { blocks, transitionSeconds },
+  });
+  const rest = (seconds: number): Block => ({ ...createBlock("rest", names), seconds } as Block);
+  const label = (timer: Timer) =>
+    phases(timer).map((phase) => `${phase.kind} ${phase.name} ${phase.seconds ?? "open"} @${phase.block ?? "-"}`);
+
+  it("runs the blocks one after the other, with a transition between two blocks", () => {
+    expect(label(template())).toEqual([
+      "prepare Prepare 10 @-",
+      ...Array.from({ length: 8 }, () => ["work Work 20 @0", "rest Rest 10 @0"]).flat(),
+      "prepare Transition 30 @1",
+      "effort 10 push-ups 120 @1",
+      "prepare Transition 30 @2",
+      "effort Plank open @2",
+      "recovery Cool down 60 @-",
+    ]);
+  });
+
+  it("puts no transition next to a rest block", () => {
+    const [intervals, effort] = [createBlock("intervals", names), createBlock("effort", names)];
+    const timer = withBlocks([intervals, rest(45), effort, effort]);
+
+    expect(label(timer).filter((line) => !line.startsWith("work") && !line.startsWith("rest Rest 10"))).toEqual([
+      "prepare Prepare 10 @-",
+      "rest Rest 45 @1",
+      "effort 10 push-ups open @2",
+      "prepare Transition 30 @3",
+      "effort 10 push-ups open @3",
+      "recovery Cool down 60 @-",
+    ]);
+  });
+
+  it("counts rounds and cycles inside an intervals block", () => {
+    const block = { ...createBlock("intervals", names), rounds: 2, cycles: 2, cycleRestSeconds: 15 } as Block;
+    const lines = phases(withBlocks([block])).map((phase) => `${phase.name} ${phase.round}/${phase.cycle}`);
+
+    expect(lines).toEqual([
+      "Prepare 1/1",
+      "Work 1/1",
+      "Rest 1/1",
+      "Work 2/1",
+      "Rest 2/1",
+      "Rest between cycles 2/1",
+      "Work 1/2",
+      "Rest 1/2",
+      "Work 2/2",
+      "Rest 2/2",
+      "Cool down 1/1",
+    ]);
+  });
+
+  it("leaves the efforts out of the total time and counts them apart", () => {
+    // 10 prepare + 8 × 30 + 2 × 30 transitions + 60 recovery; the limit of the push-ups does not count.
+    expect(formatDuration(totalSeconds(phases(template())))).toBe("6:10");
+    expect(effortCount(phases(template()))).toBe(2);
+  });
+
+  it("gives the phases of one block on its own", () => {
+    const [tabata, pushUps] = template().circuit!.blocks;
+
+    expect(totalSeconds(blockPhases(tabata, en.phases))).toBe(240);
+    expect(blockPhases(pushUps, en.phases).map((phase) => phase.kind)).toEqual(["effort"]);
+  });
+
+  it("lists its blocks as its summary", () => {
+    expect(summarize(template(), en.counts.cycles)).toBe("Tabata · 10 push-ups · Plank");
+  });
+
+  it("can start only with a block", () => {
+    const empty = withBlocks([]);
+
+    expect(canStart(template(), phases(template()))).toBe(true);
+    expect(canStart(empty, phases(empty))).toBe(false);
+  });
+
+  it("copies a timer into an intervals block and a challenge into an effort", () => {
+    const tabata = starter(names.classicTabata);
+    const challenge = TEMPLATES.find((candidate) => candidate.id === "challenge")!.create(names);
+
+    const intervals = blockFromTimer(tabata);
+    expect(intervals).toMatchObject({ type: "intervals", name: tabata.name, rounds: 8, cycles: 1 });
+    expect(intervals?.type === "intervals" && intervals.steps.map((step) => step.seconds)).toEqual([20, 10]);
+    // The copy does not share its ids with the timer.
+    expect(intervals?.type === "intervals" && intervals.steps[0].id).not.toBe(tabata.steps[0].id);
+
+    expect(blockFromTimer(challenge)).toMatchObject({ type: "effort", name: challenge.name, goal: "shortest" });
+    expect(blockFromTimer(template())).toBeNull();
+  });
+
+  it("duplicates a block with new ids", () => {
+    const block = createBlock("intervals", names);
+    const copy = duplicateBlock(block);
+
+    expect(copy.id).not.toBe(block.id);
+    expect(copy.type === "intervals" && copy.steps[0].id).not.toBe(block.type === "intervals" && block.steps[0].id);
   });
 });

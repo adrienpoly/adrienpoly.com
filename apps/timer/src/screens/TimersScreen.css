@@ -146,9 +146,37 @@
 }
 
 .timer-card-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   font-size: 40px;
   line-height: 1;
   color: var(--timer-color);
+}
+
+/* Under the timed length of a circuit: its efforts, which have no set length. */
+.timer-card-efforts {
+  margin-top: 2px;
+  font-family: var(--font-text);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: none;
+  white-space: nowrap;
+  color: #b98cff;
+}
+
+.timer-card-badge {
+  margin-left: 8px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--timer-color);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  vertical-align: 2px;
+  color: var(--ink);
 }
 
 .timer-card-action {
