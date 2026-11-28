@@ -43,7 +43,7 @@ export function App() {
   // Until the setting has been read (a few milliseconds), nothing is drawn.
   const language = resolveLanguage(setting ?? "auto", navigator.languages);
   const messages = MESSAGES[language];
-  const { timers, save, remove } = useTimers(language);
+  const { timers, save, touch, remove } = useTimers(language);
   const {
     results,
     save: saveResult,
@@ -79,10 +79,10 @@ export function App() {
     if (timer.id === challengeId) setChallengeId(null);
   }
 
-  /** The results of the efforts that a circuit no longer has go too. */
+  /** The results of the efforts that a circuit no longer has go too. Saving brings the timer to the top. */
   function saveTimer(timer: Timer) {
     removeResults(...removedEfforts(timers?.find((candidate) => candidate.id === timer.id), timer));
-    save(timer);
+    save({ ...timer, usedAt: Date.now() });
   }
 
   function showChallenge(timerId: string) {
@@ -107,6 +107,7 @@ export function App() {
   /** The end of a session. The efforts of a circuit that count are kept as results. */
   const showResult = useCallback(
     (result: SessionResult) => {
+      touch(result.timer.id, result.finishedAt);
       if (!result.timer.circuit) {
         setScreen({ name: "done", result });
         return;
@@ -118,7 +119,7 @@ export function App() {
       const resultIds = Object.fromEntries(saved.map((entry) => [entry.timerId, entry.result.id]));
       setScreen({ name: "circuitDone", result, resultIds });
     },
-    [saveResults],
+    [saveResults, touch],
   );
 
   useEffect(() => {
@@ -272,6 +273,7 @@ export function App() {
             onFinish={(seconds) => {
               const result = createResult(seconds, Date.now());
               saveResult(screen.timer.id, result);
+              touch(screen.timer.id, result.at);
               setScreen({ name: "attemptDone", timerId: screen.timer.id, resultId: result.id });
             }}
           />

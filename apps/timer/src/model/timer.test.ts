@@ -9,6 +9,7 @@ import {
   duplicateBlock,
   effortCount,
   formatDuration,
+  sortByRecent,
   summarize,
   TEMPLATES,
   totalSeconds,
@@ -210,5 +211,24 @@ describe("circuits", () => {
 
     expect(copy.id).not.toBe(block.id);
     expect(copy.type === "intervals" && copy.steps[0].id).not.toBe(block.type === "intervals" && block.steps[0].id);
+  });
+});
+
+describe("sortByRecent", () => {
+  const timer = (id: string, usedAt?: number) => ({ id, ...(usedAt !== undefined && { usedAt }) });
+  const ids = (timers: Array<{ id: string }>) => timers.map((t) => t.id);
+
+  it("puts the most recently used timer first", () => {
+    expect(ids(sortByRecent([timer("a", 100), timer("b", 300), timer("c", 200)]))).toEqual(["b", "c", "a"]);
+  });
+
+  it("puts timers never used since the date existed last, in their saved order", () => {
+    expect(ids(sortByRecent([timer("a"), timer("b", 100), timer("c"), timer("d")]))).toEqual(["b", "a", "c", "d"]);
+  });
+
+  it("leaves the list it is given alone", () => {
+    const list = [timer("a", 1), timer("b", 2)];
+    sortByRecent(list);
+    expect(ids(list)).toEqual(["a", "b"]);
   });
 });

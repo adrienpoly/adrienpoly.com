@@ -145,6 +145,18 @@ export interface Timer {
    * preparation and the recovery. A circuit has no steps of its own.
    */
   circuit?: Circuit;
+  /**
+   * When the timer was last created, changed or completed, in milliseconds
+   * since the epoch. The list shows the most recent first. Timers saved before
+   * this existed have none: they come last, in their saved order.
+   */
+  usedAt?: number;
+}
+
+/** The timers, the most recently created, changed or completed first. */
+export function sortByRecent<T extends Pick<Timer, "usedAt">>(timers: T[]): T[] {
+  // Array.prototype.sort is stable: timers without a date keep their order.
+  return [...timers].sort((a, b) => (b.usedAt ?? 0) - (a.usedAt ?? 0));
 }
 
 interface PhaseBase {
