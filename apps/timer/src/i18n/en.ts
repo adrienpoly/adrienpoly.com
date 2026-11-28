@@ -26,12 +26,17 @@ const names: DefaultNames = {
   morningCore: "Morning core",
   boxing: "Boxing 3 rounds",
   trackIntervals: "Track intervals",
+  circuit: "Circuit",
+  intervals: "Intervals",
+  pushUps: "10 push-ups",
+  plank: "Plank",
 };
 
 const phases: PhaseNames = {
   prepare: "Prepare",
   cycleRest: "Rest between cycles",
   recovery: "Cool down",
+  transition: "Transition",
 };
 
 const colors: Record<TimerColorId, string> = {
@@ -47,6 +52,7 @@ const templates: Record<TemplateId, { name: string; description: string }> = {
   rounds: { name: "Rounds", description: "Work + rest, repeated N times" },
   laps: { name: "Lap timer", description: "A beep on every lap" },
   challenge: { name: "Challenge", description: "A stopwatch that keeps your results" },
+  circuit: { name: "Circuit", description: "Intervals and timed efforts, one after the other" },
   blank: { name: "Blank", description: "Build your own steps" },
 };
 
@@ -224,6 +230,76 @@ export const en = {
     correctResult: "Correct the result",
     date: "Date",
     deleteResult: "Delete the result",
+  },
+
+  circuit: {
+    name: "Circuit name",
+    blocks: "Blocks",
+    reorderHint: "Drag the handle to reorder",
+    addBlock: "Add a block",
+    betweenBlocks: "Between blocks",
+    transitionHint: "Time to get ready for the next block",
+    timedTotal: "Timed part",
+    plusEfforts: (count: number) => `+ ${plural(count, "timed effort")}`,
+    deleteCircuit: "Delete circuit",
+    confirmDelete: (name: string) => `Delete “${name}” and its records?`,
+    /** Under the name, on the card of a circuit in the list. */
+    badge: "Circuit",
+    efforts: (count: number) => `+ ${plural(count, "effort")}`,
+
+    /** What each kind of block is, on its card in the editor. */
+    types: {
+      intervals: "Intervals",
+      rest: "Rest",
+    },
+    noLimit: "no limit",
+    limitOf: (time: string) => `limit ${time}`,
+    record: "record",
+
+    /** The sheet that adds a block. */
+    add: {
+      title: "Add a block",
+      intervals: { label: "Intervals", hint: "Tabata, rounds, laps: a set time" },
+      shortest: { label: "Fastest", hint: "The stopwatch runs until “Done”. E.g. 10 push-ups" },
+      longest: { label: "Longest", hint: "The stopwatch runs until “Let go”. E.g. plank" },
+      rest: { label: "Rest", hint: "A pause of a set time" },
+      copy: "Copy one of my timers",
+      copyNote: "The block is a copy: changing the timer it comes from does not change the circuit.",
+    },
+
+    /** The editor of one block. */
+    block: {
+      name: "Block name",
+      limit: "Time limit",
+      limitHint: "The effort stops by itself after this time. 0:00: no limit",
+      duration: "Duration",
+      durationHint: "A pause before the next block",
+      delete: "Delete block",
+      confirmDelete: (name: string) => `Delete the block “${name}” and its records?`,
+    },
+
+    /** A session: the screen of an effort. */
+    session: {
+      block: "Block",
+      record: "Record",
+      limit: "Limit",
+      finish: { shortest: "Done", longest: "Let go" } satisfies Record<ChallengeGoal, string>,
+      /** Spoken. */
+      sayEffort: (name: string, goal: ChallengeGoal) =>
+        goal === "shortest" ? `${name}. As fast as you can` : `${name}. Hold as long as you can`,
+    },
+
+    /** The end of a circuit. */
+    done: {
+      title: ["Circuit", "complete!"],
+      records: (count: number) => (count === 1 ? "Record" : "Records"),
+      byBlock: "Block by block",
+      completed: "Done",
+      first: "First result",
+      newRecord: (difference: string) => `Record! ${difference}`,
+      reachedLimit: "Limit reached",
+      skipped: "Skipped",
+    },
   },
 
   settings: {

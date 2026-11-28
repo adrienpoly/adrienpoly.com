@@ -121,6 +121,19 @@
   text-align: center;
 }
 
+/* The goal of an effort, above its name: "Fastest", "Longest". */
+.session-goal {
+  margin-bottom: 8px;
+  padding: 5px 12px;
+  border-radius: 10px;
+  background: var(--ink);
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--phase);
+}
+
 .session-time {
   /* 230px on a 390 × 844 screen. */
   font-size: min(59cqw, 30cqh);
@@ -232,6 +245,11 @@
   background: var(--ink);
   color: var(--phase);
   transition: color 0.25s;
+}
+
+/* The button that ends an effort (ChallengeSession.css), a little lower than in a challenge: the record and the next phase sit above it. */
+.session-finish {
+  height: 28cqh;
 }
 
 /* Turning the phone already gives landscape; the button is for upright phones only. */
@@ -351,6 +369,11 @@
   .session-controls {
     margin-top: auto;
     padding: 0;
+  }
+
+  .session-goal {
+    margin-bottom: 4px;
+    font-size: 12px;
   }
 
   .session-skip {

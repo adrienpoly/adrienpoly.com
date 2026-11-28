@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createStarterTimers } from "../model/timer";
+import { createStarterTimers, TEMPLATES } from "../model/timer";
 import { MESSAGES } from "./language";
 import { localizeNames } from "./names";
 
@@ -32,6 +32,19 @@ describe("localizeNames", () => {
 
     expect(localized.name).toBe("Mardi soir");
     expect(localized.steps.map((step) => step.name)).toEqual(["Pompes", en.names.rest]);
+  });
+
+  it("shows the blocks of a circuit and their steps in the current language", () => {
+    const circuit = TEMPLATES.find((template) => template.id === "circuit")!.create(fr.names);
+    const localized = localizeNames(circuit, "en");
+    const blocks = localized.circuit?.blocks ?? [];
+
+    expect(localized.name).toBe(en.names.circuit);
+    expect(blocks.map((block) => block.name)).toEqual([en.names.tabata, en.names.pushUps, en.names.plank]);
+    expect(blocks[0].type === "intervals" && blocks[0].steps.map((step) => step.name)).toEqual([
+      en.names.work,
+      en.names.rest,
+    ]);
   });
 
   it("can tell the default names of a language apart", () => {

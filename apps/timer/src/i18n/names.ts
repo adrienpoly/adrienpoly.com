@@ -1,4 +1,4 @@
-import type { DefaultNames, Timer } from "../model/timer";
+import type { Block, DefaultNames, Step, Timer } from "../model/timer";
 import { LANGUAGES, MESSAGES, type Language } from "./language";
 
 // Timer and step names are stored as plain text, including the ones the app
@@ -19,10 +19,25 @@ function translate(name: string, language: Language): string {
   return name;
 }
 
+const localizeSteps = (steps: Step[], language: Language) =>
+  steps.map((step) => ({ ...step, name: translate(step.name, language) }));
+
+function localizeBlock(block: Block, language: Language): Block {
+  const name = translate(block.name, language);
+  if (block.type === "intervals") return { ...block, name, steps: localizeSteps(block.steps, language) };
+  return { ...block, name };
+}
+
 export function localizeNames(timer: Timer, language: Language): Timer {
   return {
     ...timer,
     name: translate(timer.name, language),
-    steps: timer.steps.map((step) => ({ ...step, name: translate(step.name, language) })),
+    steps: localizeSteps(timer.steps, language),
+    ...(timer.circuit && {
+      circuit: {
+        ...timer.circuit,
+        blocks: timer.circuit.blocks.map((block) => localizeBlock(block, language)),
+      },
+    }),
   };
 }
